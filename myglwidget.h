@@ -21,6 +21,7 @@
 #include <time.h>
 #include <conio.h>
 
+#include <unordered_map>
 #include "shape_coordinate.h"
 
 class MyGLWidget : public QOpenGLWidget, QOpenGLFunctions_3_3_Core {
@@ -126,10 +127,12 @@ private:
     GLuint vertexShader;
     GLuint fragmentShader;
     GLuint program;
-    // 漫反射纹理贴图
-    GLuint diffuseMap;
     // 控制是否使用漫反射纹理贴图 1为使用 0为不使用
     GLint useTexture = 0;
+    // 记录所有图像路径和纹理贴图的映射关系
+    std::unordered_map<const char*, GLuint> imgpath2texture;
+    // 记录所有图像路径和编号(即第几个图像)的映射关系
+    std::unordered_map<const char*, int> imgpath2index;
 
     /* *********************** */
 

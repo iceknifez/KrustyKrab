@@ -72,10 +72,6 @@ void MyGLWidget::initializeGL()
 	initRestaurant();
 	initSkybox();
 
-	// 创建漫反射纹理贴图并进行绑定
-	glGenTextures(1, &diffuseMap);
-	glBindTexture(GL_TEXTURE_2D, diffuseMap);
-
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -113,16 +109,16 @@ void MyGLWidget::paintGL()
 	// 绘制地板
 	//setObjectColor(135 / 255.0, 176 / 255.0, 111 / 255.0);
 	useTexture = 1;
-	//setDiffuseMap("img/floor.png");
+	setDiffuseMap("img/floor.png");
 	drawCuboid(0.0f, -0.5f, 0.0f, 480.0f, 1.0f, 500.0f);
 	// 绘制餐厅内墙面	
-	//setDiffuseMap("img/wallpaper1.png");
+	setDiffuseMap("img/wallpaper1.png");
 	drawCuboid(0.0f, 75.0f, -90.5f, 360.0f, 150.0f, 1.0f);
-	//setDiffuseMap("img/wallpaper2.png");
+	setDiffuseMap("img/wallpaper2.png");
 	drawCuboid(0.0f, 150.5f, -140.0f, 360.0f, 1.0f, 100.0f);
 
 	// 绘制杂物箱
-	//setDiffuseMap("img/box.png");
+	setDiffuseMap("img/box.png");
 	drawCuboid(-80.0f, 161.0f, -140.0f, 30.0f, 20.0f, 30.0f);
 	drawCuboid(100.0f, 161.0f, -140.0f, 35.0f, 20.0f, 35.0f, 45.0f, 0.0f, 1.0f, 0.0f);
 	drawCuboid(105.0f, 181.0f, -140.0f, 30.0f, 20.0f, 30.0f, 30.0f, 0.0f, 1.0f, 0.0f);
@@ -177,7 +173,7 @@ void MyGLWidget::paintGL()
 
 	// 绘制天空盒
 	useTexture = 1;	// 使用漫反射纹理贴图
-	//setDiffuseMap("img/skybox1.png");
+	setDiffuseMap("img/skybox1.png");
 	glPushMatrix();
 	//glTranslatef(0.0f, 349.0f, 0.0f);
 	glTranslatef(viewPos[0], viewPos[1], viewPos[2]);
@@ -316,38 +312,55 @@ void MyGLWidget::updateShader()
 	glUniform3f(lightAmbientLoc, 0.4f, 0.4f, 0.4f);
 	glUniform3f(lightDiffuseLoc, 0.5f, 0.5f, 0.5f);
 	glUniform3f(lightSpecularLoc, 0.5f, 0.5f, 0.5f);
-
-	glUniform1i(glGetUniformLocation(program, "material.diffuse"), 0);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, diffuseMap);
-
-	glUniform1i(glGetUniformLocation(program, "useTexture"), useTexture);
 }
 
 void MyGLWidget::setDiffuseMap(const char* imagePath)
 {
-	QImage image = QImage(imagePath);
-	// 将QT读取的图像转化为OpenGL纹理需要的格式
-	// 比如把bgr换成rgb的形式 以及对图像进行一次翻转等等
-	image = QGLWidget::convertToGLFormat(image);
+	GLuint textureID = 0;
+	int index = 0;
+	// 如果纹理贴图之前未加载过 则创建新的纹理对象 并将路径与纹理对象的映射关系保存到 imgpath2texture 中
+	if (!imgpath2texture.count(imagePath)) {
+		GLint maxTextureUnits;
+		glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
+		if (imgpath2texture.size() >= maxTextureUnits) {	// 纹理贴图数量已达上限 添加失败
+			std::cout << "The number of texture maps has reached the maximum limit, fail to a new texture map!" << std::endl;
+			return;
+		}
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		index = imgpath2texture.size();
+		imgpath2index[imagePath] = index;		// 记录图像对应的编号
+		imgpath2texture[imagePath] = textureID;	// 记录图像对应的纹理贴图
 
-	// 获取图片的高度和宽度
-	int width, height;
-	width = image.width();
-	height = image.height();
+		QImage image = QImage(imagePath);
+		// 将QT读取的图像转化为OpenGL纹理需要的格式
+		// 比如把bgr换成rgb的形式 以及对图像进行一次翻转等等
+		image = QGLWidget::convertToGLFormat(image);
 
-	// 为当前绑定的纹理对象 即diffuseMap 附加上纹理图像
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
-	glGenerateMipmap(GL_TEXTURE_2D);
+		// 获取图片的高度和宽度
+		int width, height;
+		width = image.width();
+		height = image.height();
 
-	// 设置纹理环绕方式
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// 设置多级渐远纹理过滤方式
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		// 为当前绑定的纹理对象附加上纹理图像
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+		glGenerateMipmap(GL_TEXTURE_2D);
 
-	glBindTexture(GL_TEXTURE_2D, 0);
+		// 设置纹理环绕方式
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		// 设置多级渐远纹理过滤方式
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+	} else {
+		textureID = imgpath2texture[imagePath];
+		index = imgpath2index[imagePath];
+	}
+	glUniform1i(glGetUniformLocation(program, "material.diffuse"), index);
+	// 绑定纹理对象到纹理单元
+	glActiveTexture(GL_TEXTURE0 + index);  // 设置纹理单元为 GL_TEXTURE0 + index
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glUniform1i(glGetUniformLocation(program, "useTexture"), useTexture);
 }
 
 void MyGLWidget::drawCashier()
@@ -356,15 +369,15 @@ void MyGLWidget::drawCashier()
 
 	// 船体
 	useTexture = 1;	// 使用漫反射纹理贴图
-	//setDiffuseMap("img/boat1.png");
+	setDiffuseMap("img/boat1.png");
 	drawCuboid(8 + 30 - 0.5f, 0.0f, 0.0f, 1.0f, 10.0f, 16.0f);	// 后钢板
 	drawCuboid(8 + 0.5f, 0.0f, 0.0f, 1.0f, 10.0f, 16.0f);		// 前钢板
 	drawCuboid(8 + 15.0f, 0.0f, 7.5f, 28.0f, 10.0f, 1.0f);		// 左钢板
 	drawCuboid(8 + 15.0f, 0.0f, -7.5f, 28.0f, 10.0f, 1.0f);		// 右钢板
 	drawCuboid(8 + 15.0f, -4.5f, 0.0f, 28.0f, 1.0f, 14.0f);		// 底板
-	//setDiffuseMap("img/boat1_rotate.png");
+	setDiffuseMap("img/boat1_rotate.png");
 	drawSemicylinder(8.0f, 0.0f, 0.0f, 8.0f, 5.0f, 8.0f);	// 船头
-	//setDiffuseMap("img/boat2.png");
+	setDiffuseMap("img/boat2.png");
 	drawCuboid(0.0f, 1.0f, 0.0f, 2.0f, 12.0f, 2.0f);		// 船头柱子
 
 	setObjectColor(0.76f, 0.82f, 0.94f);	// 将颜色设置为浅蓝色 (193, 210, 240)
@@ -377,7 +390,7 @@ void MyGLWidget::drawCashier()
 
 	// 收银台
 	// setObjectColor(0.1f, 0.2f, 0.2f);	// 将收银台颜色设置为偏蓝绿的深灰色
-	//setDiffuseMap("img/cashier.png");
+	setDiffuseMap("img/cashier.png");
 	drawCuboid(8.0f - 2.0f, 6.0f, 0.0f, 4.0f, 2.0f, 8.0f);	// 平放结构
 	drawCuboid(8.0f - 5.0f, 7.0f, 0.0f, 2.0f, 4.0f, 8.0f);	// 直立结构
 	drawCuboid(8.0f - 5.0f, 9.5f, 0.0f, 1.0f, 1.0f, 1.0f);	// 小直立结构
@@ -854,7 +867,7 @@ void MyGLWidget::drawRestaurant() {
 
 	// 绘制底部、门板和屋顶下部
 	useTexture = 1;	// 使用漫反射纹理贴图
-	//setDiffuseMap("img/wood7.jpg");	// 指定图片
+	setDiffuseMap("img/wood7.jpg");	// 指定图片
 	glPushMatrix();
 	glBindVertexArray(quadsVAO);
 	updateShader();	// 每次进行绘制之前要调用该方法
@@ -970,10 +983,10 @@ void MyGLWidget::drawDesk()
 {
 	// 桌面
 	useTexture = 1;
-	//setDiffuseMap("img/desk1.png");
+	setDiffuseMap("img/desk1.png");
 	drawCylinder(0.0f, 21.0f, 0.0f, 16.0f, 3.0f, 16.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	// 支柱
-	//setDiffuseMap("img/desk2.png");
+	setDiffuseMap("img/desk2.png");
 	drawCylinder(0.0f, 11.0f, 0.0f, 2.0f, 20.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	// 地盘
 	drawCylinder(0.0f, 0.0f, 0.0f, 5.0f, 2.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
@@ -995,7 +1008,7 @@ void MyGLWidget::drawChair()
 
 	// 绘制桶上沿
 	useTexture = 1;
-	//setDiffuseMap("img/chair1_2.png");
+	setDiffuseMap("img/chair1_2.png");
 	glPushMatrix();
 	glTranslatef(0.0f, 12.0f, 0.0f);
 	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
@@ -1022,7 +1035,7 @@ void MyGLWidget::drawChair()
 
 
 	// 绘制桶的铁环
-	//setDiffuseMap("img/chair2.png");
+	setDiffuseMap("img/chair2.png");
 	glPushMatrix();
 	glTranslatef(0.0f, 10.0f, 0.0f);
 	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
