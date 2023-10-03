@@ -61,8 +61,8 @@ void MyGLWidget::initializeGL()
 
 	// 初始化着色器和VBO
 	initShader("vertexShader.glsl", "fragmentShader.glsl");
-	initCubeVBO();
-	initSemicylinderVBO();
+	initCube();
+	initSemicylinder();
 
 	initCylinderVBO();
 	initTaperVBO();
@@ -394,22 +394,9 @@ void MyGLWidget::drawCuboid(float tx, float ty, float tz, float sx, float sy, fl
 	glRotatef(angle, rx, ry, rz);
 	updateShader();
 
-	glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
-
-	// 指定顶点属性数组的数据格式和位置
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	//glEnableVertexAttribArray(1);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(2);
-
+	glBindVertexArray(cubeVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+	glBindVertexArray(0);
 	glPopMatrix();
 }
 
@@ -422,21 +409,9 @@ void MyGLWidget::drawSemicylinder(float tx, float ty, float tz, float sx, float 
 	glRotatef(angle, rx, ry, rz);
 	updateShader();
 
-	glBindBuffer(GL_ARRAY_BUFFER, semicylinderVBO);
-
-	// 指定顶点属性数组的数据格式和位置
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	//glEnableVertexAttribArray(1);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(2);
-
+	glBindVertexArray(semicylinderVAO);
 	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfSemicylinder);
+	glBindVertexArray(0);
 	glPopMatrix();
 }
 
@@ -529,8 +504,11 @@ void MyGLWidget::setCamera(int key)
 	gluLookAt(viewPos[0], viewPos[1], viewPos[2], viewDesPos[0], viewDesPos[1], viewDesPos[2], 0, 1, 0);
 }
 
-void MyGLWidget::initCubeVBO()
+void MyGLWidget::initCube()
 {
+	// 创建VAO并绑定
+	glGenVertexArrays(1, &cubeVAO);
+	glBindVertexArray(cubeVAO);
 	// 为VBO创建一个缓冲区对象
 	glGenBuffers(1, &cubeVBO);
 	// 利用数组中的内容更新VBO的信息
@@ -545,9 +523,10 @@ void MyGLWidget::initCubeVBO()
 	glEnableVertexAttribArray(2);
 	// 解绑定
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
-void MyGLWidget::initSemicylinderVBO()
+void MyGLWidget::initSemicylinder()
 {
 	// 两个三角形 作为半圆迭代的开始
 	GLfloat temp[2 * 3 * 3] =
@@ -733,16 +712,15 @@ void MyGLWidget::initSemicylinderVBO()
 	semicylinderVertices.insert(semicylinderVertices.end(), lowerVertices.begin(), lowerVertices.end());
 	semicylinderVertices.insert(semicylinderVertices.end(), sideVertices.begin(), sideVertices.end());
 
+	// 创建VAO并绑定
+	glGenVertexArrays(1, &semicylinderVAO);
+	glBindVertexArray(semicylinderVAO);
 	// 为VBO创建一个缓冲区对象
 	glGenBuffers(1, &semicylinderVBO);
 	// 利用vertices数组中的内容更新VBO的信息
 	glBindBuffer(GL_ARRAY_BUFFER, semicylinderVBO);
 	glBufferData(GL_ARRAY_BUFFER, semicylinderVertices.size() * sizeof(GLfloat), &semicylinderVertices[0], GL_STATIC_DRAW);
 	// 指定顶点属性数组的数据格式和位置
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	//glEnableVertexAttribArray(1);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
@@ -751,6 +729,7 @@ void MyGLWidget::initSemicylinderVBO()
 	glEnableVertexAttribArray(2);
 	// 解绑定
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
 void MyGLWidget::subdivideSemicircle(int depth, std::vector<GLfloat>& vertices)
@@ -964,11 +943,11 @@ void MyGLWidget::drawTorus(float innerRadius, float OutRadius) {
 			verties[index++] = (float)j / Rings;
 		}
 	}
-	glGenBuffers(1, &VBOOutButtomId);
-	glBindBuffer(GL_ARRAY_BUFFER, VBOOutButtomId);
-	// 生成VAO对象绑定
+	// 生成VAO和VBO并绑定
 	glGenVertexArrays(1, &VAOOutButtomId);
 	glBindVertexArray(VAOOutButtomId);
+	glGenBuffers(1, &VBOOutButtomId);
+	glBindBuffer(GL_ARRAY_BUFFER, VBOOutButtomId);
 	// 把之前定义的顶点数据复制到缓冲的内存中
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verties), verties, GL_STATIC_DRAW);
 	// 设置顶点属性指针

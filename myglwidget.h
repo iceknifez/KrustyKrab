@@ -63,10 +63,10 @@ protected:
     void rotateViewDes(bool turnRight);
     // 检测用户是否按下键盘 并对摄像机进行设置
     void setCamera(int key);
-    // 初始化cubeVBO 该vbo保存了绘制正方体的信息
-    void initCubeVBO();
-    // 初始化semicylinderVBO 该vbo保存了绘制半圆柱体的信息
-    void initSemicylinderVBO();
+    // 初始化cubeVBO和cubeVAO 保存了绘制正方体的信息
+    void initCube();
+    // 初始化semicylinderVBO和semicylinderVAO 保存了绘制半圆柱体的信息
+    void initSemicylinder();
     // 细分得到半圆 结果保存在semicircleVertices数组中
     void subdivideSemicircle(int depth, std::vector<GLfloat>& v);
     // 通过两个原有顶点位置计算得到新的中点位置
@@ -134,7 +134,9 @@ private:
     /* *********************** */
 
     GLuint cubeVBO; // 保存了绘制正方体的信息 包括顶点位置和法向量
+    GLuint cubeVAO; // 保存了绘制正方体的信息 用于管理顶点属性的状态
     GLuint semicylinderVBO; // 保存了绘制半圆柱体的信息 包括顶点位置和法向量
+    GLuint semicylinderVAO; // 保存了绘制半圆柱体的信息 用于管理顶点属性的状态
     std::vector<GLfloat> semicircleVertices;    // 保存了半圆顶点位置
     std::vector<GLfloat> semicylinderVertices;  // 保存了半圆柱体顶点信息 包括位置和法向量
     int vertexNumOfSemicylinder;    // 绘制半圆柱体所需的顶点数量
