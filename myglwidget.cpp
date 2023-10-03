@@ -886,38 +886,12 @@ void MyGLWidget::drawRestaurant() {
 	// 绘制屋顶
 	drawSemicylinder(0.0f, 70.0f, -5.0f, 34.0f, 20.0f, 19.0f, -90.0f, 0.0f, 0.0f, 1.0f);
 
-	// 柱子2，注意后面的柱子先绘制
-	glPushMatrix();
-	glTranslatef(34.0f, 10.0f, -24.0f);
-	glRotatef(-90, 1, 0, 0);
-	// 半径为4，高为60的圆柱体
-	drawCylinder(4.0f, 360.0f, 60.0f);
-	glPopMatrix();
-	// 柱子3
-	glPushMatrix();
-	glTranslatef(-34.0f, 10.0f, -24.0f);
-	glRotatef(-90, 1, 0, 0);
-	// 半径为4，高为60的圆柱体
-	drawCylinder(4.0f, 360.0f, 60.0f);
-	glPopMatrix();
-
-
+	// 绘制柱子（半径为4，高为60的圆柱体） 注意后面的柱子先绘制
+	drawCylinder(34.0f, 40.0f, -24.0f, 4.0f, 60.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);	// 柱子2
+	drawCylinder(-34.0f, 40.0f, -24.0f, 4.0f, 60.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);	// 柱子3
 	// 绘制两旁的柱子
-	// 柱子1
-	glPushMatrix();
-	glTranslatef(34.0f, 10.0f, 14.0f);
-	// 柱子沿x轴旋转90度
-	glRotatef(-90, 1, 0, 0);
-	// 半径为4，高为60的圆柱体
-	drawCylinder(4.0f, 360.0f, 60.0f);
-	glPopMatrix();
-	// 柱子4
-	glPushMatrix();
-	glTranslatef(-34.0f, 10.0f, 14.0f);
-	glRotatef(-90, 1, 0, 0);
-	// 半径为4，高为60的圆柱体
-	drawCylinder(4.0f, 360.0f, 60.0f);
-	glPopMatrix();
+	drawCylinder(34.0f, 40.0f, 14.0f, 4.0f, 60.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);	// 柱子1
+	drawCylinder(-34.0f, 40.0f, 14.0f, 4.0f, 60.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);	// 柱子4
 
 	// 绘制圆环
 	glPushMatrix();
@@ -940,7 +914,7 @@ void MyGLWidget::drawRestaurant() {
 
 /*###################################################
 ##  函数: DrawTorus
-##  函数描述： innerRadius:内环半径，OutEadius：外环半径
+##  函数描述： innerRadius:内环半径，OutEadius：外环半径，Sides和Rings都是切割数
 ##  参数描述： 绘制三维立体半圆环
 #####################################################*/
 void MyGLWidget::drawTorus(float innerRadius, float OutRadius) {
@@ -1012,70 +986,6 @@ void MyGLWidget::drawTorus(float innerRadius, float OutRadius) {
 	glDrawArrays(GL_QUAD_STRIP, 0, 2 * (Sides + 1) * (Rings + 1));
 	glBindVertexArray(0);
 }
-
-/*###################################################
-##  函数: DrawCylinder
-##  函数描述： innerRadius:内环半径，OutEadius：外环半径，Sides和Rings都是切割数
-##  参数描述： 绘制圆柱体
-#####################################################*/
-void MyGLWidget::drawCylinder(float Radius, float angle, float height) {
-	const int n = 50;
-	float VertiesCylinder[8 * (n + 1) * 2];
-	float angDegSpan = angle / n;
-	int index = 0;
-	int texIndex = 0;
-	float p1[3], p2[3], p3[3], p4[3];
-	float nor[3];
-	for (int u = 0; u <= n; u++) {
-		float i = u * angDegSpan;
-		p2[0] = (float)(Radius * sin(i * PI / 180.0f));
-		p2[1] = (float)(Radius * cos(i * PI / 180.0f));
-		p2[2] = height;
-		p1[0] = (float)(Radius * sin(i * PI / 180.0f));
-		p1[1] = (float)(Radius * cos(i * PI / 180.0f));
-		p1[2] = 0.0;
-		VertiesCylinder[index++] = p2[0];
-		VertiesCylinder[index++] = p2[1];
-		VertiesCylinder[index++] = p2[2];
-		VertiesCylinder[index++] = p2[0];
-		VertiesCylinder[index++] = p2[1];
-		VertiesCylinder[index++] = 0.0f;
-		VertiesCylinder[index++] = i / 360.0f;
-		VertiesCylinder[index++] = 0.0f;
-
-		VertiesCylinder[index++] = p1[0];
-		VertiesCylinder[index++] = p1[1];
-		VertiesCylinder[index++] = p1[2];
-		VertiesCylinder[index++] = p1[0];
-		VertiesCylinder[index++] = p1[1];
-		VertiesCylinder[index++] = 0.0f;
-		VertiesCylinder[index++] = i / 360.0f;
-		VertiesCylinder[index++] = 1.0f;
-	}
-
-	glGenBuffers(1, &VBOOutButtomId);
-	glBindBuffer(GL_ARRAY_BUFFER, VBOOutButtomId);
-	// 生成VAO对象绑定
-	glGenVertexArrays(1, &VAOOutButtomId);
-	glBindVertexArray(VAOOutButtomId);
-	// 把之前定义的顶点数据复制到缓冲的内存中
-	glBufferData(GL_ARRAY_BUFFER, sizeof(VertiesCylinder), VertiesCylinder, GL_STATIC_DRAW);
-	// 设置顶点属性指针
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(2);
-	// 解绑VAO
-	glBindVertexArray(0);
-
-	glBindVertexArray(VAOOutButtomId);
-	updateShader();
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 2 * (n + 1));
-	glBindVertexArray(0);
-}
-
 
 void MyGLWidget::drawDesk()
 {

@@ -83,8 +83,6 @@ protected:
     void initRestaurant();
     // 绘制半圆环
     void drawTorus(float innerRadius, float OutRadius);
-    // 绘制圆柱外侧
-    void drawCylinder(float Radius, float angle, float height);
     // 绘制天空盒
     void DrawSkybox();
     // 初始化绘制天空盒所需信息
