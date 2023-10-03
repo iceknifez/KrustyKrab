@@ -21,6 +21,8 @@
 #include <time.h>
 #include <conio.h>
 
+#include "shape_coordinate.h"
+
 class MyGLWidget : public QOpenGLWidget, QOpenGLFunctions_3_3_Core {
     Q_OBJECT
 
