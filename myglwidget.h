@@ -174,7 +174,7 @@ private:
     GLuint skyboxVBO;
 
     /* *********************** */
-    int angleSky;
+
     /* *********************** */
 
     GLuint cylinderVBO; // 保存了绘制圆柱体的信息 包括顶点位置和法向量

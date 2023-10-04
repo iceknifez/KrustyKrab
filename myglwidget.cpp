@@ -3,13 +3,7 @@
 #include <qopenglextrafunctions.h>
 using namespace std;
 
-/*###################################################
-##  函数: MyGLWidget
-##  函数描述： MyGLWidget类的构造函数，实例化定时器timer
-##  参数描述：
-##  parent: MyGLWidget的父对象
-#####################################################*/
-
+// MyGLWidget类的构造函数，实例化定时器timer
 MyGLWidget::MyGLWidget(QWidget* parent)
 	:QOpenGLWidget(parent)
 {
@@ -19,12 +13,7 @@ MyGLWidget::MyGLWidget(QWidget* parent)
 	connect(timer, SIGNAL(timeout()), this, SLOT(update())); // 连接update()函数，每16ms触发一次update()函数进行重新绘图
 }
 
-
-/*###################################################
-##  函数: ~MyGLWidget
-##  函数描述： ~MyGLWidget类的析构函数，删除timer
-##  参数描述： 无
-#####################################################*/
+// MyGLWidget类的析构函数，删除timer
 MyGLWidget::~MyGLWidget()
 {
 	delete this->timer;
@@ -35,12 +24,7 @@ void MyGLWidget::keyPressEvent(QKeyEvent* event)
 	setCamera(event->key());
 }
 
-
-/*###################################################
-##  函数: initializeGL
-##  函数描述： 初始化绘图参数，如视窗大小、背景色等
-##  参数描述： 无
-#####################################################*/
+// 初始化绘图参数，如视窗大小、背景色等
 void MyGLWidget::initializeGL()
 {
 	initializeOpenGLFunctions();
@@ -78,16 +62,9 @@ void MyGLWidget::initializeGL()
 	glViewport(0, 0, width(), height());
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-	angleSky = 0;
 }
 
-int angle = 0;	// 临时变量 用来呈现旋转效果
-/*###################################################
-##  函数: paintGL
-##  函数描述： 绘图函数，实现图形绘制，会被update()函数调用
-##  参数描述： 无
-#####################################################*/
+// 绘图函数，实现图形绘制，会被update()函数调用
 void MyGLWidget::paintGL()
 {
 	// Your Implementation
@@ -177,8 +154,8 @@ void MyGLWidget::paintGL()
 	glPushMatrix();
 	//glTranslatef(0.0f, 349.0f, 0.0f);
 	glTranslatef(viewPos[0], viewPos[1], viewPos[2]);
-	glScalef(1410.0f, 700.0f, 1610.0f);
-	glRotatef(angleSky * 43, 0.0f, 1.0f, 0.0f);
+	//glScalef(1410.0f, 700.0f, 1610.0f);
+	glScalef(2500.0f, 1500.0f, 2500.0f);
 	DrawSkybox();
 	glPopMatrix();
 	useTexture = 0;
@@ -194,12 +171,7 @@ void MyGLWidget::paintGL()
 	useTexture = 0;
 }
 
-
-/*###################################################
-##  函数: resizeGL
-##  函数描述： 当窗口大小改变时调整视窗尺寸
-##  参数描述： 无
-#####################################################*/
+// 当窗口大小改变时调整视窗尺寸
 void MyGLWidget::resizeGL(int width, int height)
 {
 	glViewport(0, 0, width, height);
@@ -480,7 +452,7 @@ void MyGLWidget::rotateViewDes(bool turnRight)
 void MyGLWidget::setCamera(int key)
 {
 	// 上下左右移动相机
-	float speed = 20.0f;
+	float speed = 10.0f;
 	//printf("%d\n", ch);
 	float xRate2 = -zRate, zRate2 = xRate; // 向后的方向 即向右的方向顺时针旋转90度
 	switch (key)
@@ -505,8 +477,8 @@ void MyGLWidget::setCamera(int key)
 	// 镜头向后移动
 	case Qt::Key_S: setViewPos(viewPos[0] + speed * xRate2, viewPos[1], viewPos[2] + speed * zRate2);
 		setViewDesPos(viewDesPos[0] + speed * xRate2, viewDesPos[1], viewDesPos[2] + speed * zRate2); break;
-	case Qt::Key_A: rotateViewDes(false); angleSky++; break;	// 镜头向左旋转45度
-	case Qt::Key_D: rotateViewDes(true); angleSky--; break;	// 镜头向右旋转45度
+	case Qt::Key_A: rotateViewDes(false); break;	// 镜头向左旋转45度
+	case Qt::Key_D: rotateViewDes(true); break;	// 镜头向右旋转45度
 	case Qt::Key_Escape: close();
 	default: break;
 	}
@@ -824,11 +796,6 @@ void MyGLWidget::addVertex(GLfloat x, GLfloat y, GLfloat z, std::vector<GLfloat>
 	v.push_back(z);
 }
 
-/*###################################################
-##  函数: initRestaurant
-##  函数描述： 餐厅部分VBO初始化
-##  参数描述： 无
-#####################################################*/
 void MyGLWidget::initRestaurant() {
 
 	GLfloat vertices_quads[(22 + 18 + 24) * 4 * 8];
@@ -857,12 +824,6 @@ void MyGLWidget::initRestaurant() {
 	glBindVertexArray(0);
 }
 
-
-/*###################################################
-##  函数: DrawRestaurant
-##  函数描述： 绘图餐厅外部
-##  参数描述： 无
-#####################################################*/
 void MyGLWidget::drawRestaurant() {
 
 	// 绘制底部、门板和屋顶下部
@@ -903,12 +864,7 @@ void MyGLWidget::drawRestaurant() {
 
 }
 
-
-/*###################################################
-##  函数: DrawTorus
-##  函数描述： innerRadius:内环半径，OutEadius：外环半径，Sides和Rings都是切割数
-##  参数描述： 绘制三维立体半圆环
-#####################################################*/
+// 绘制三维立体半圆环 innerRadius:内环半径，OutEadius：外环半径，Sides和Rings都是切割数
 void MyGLWidget::drawTorus(float innerRadius, float OutRadius) {
 	const int Sides = 100;
 	const int Rings = 100;
@@ -1853,11 +1809,6 @@ void MyGLWidget::initConeVBO()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-/*###################################################
-##  函数: DrawSkybox
-##  函数描述： 天空盒绘制
-##  参数描述： 无
-#####################################################*/
 void MyGLWidget::DrawSkybox()
 {
 	glBindVertexArray(skyboxVAO);
@@ -1866,11 +1817,6 @@ void MyGLWidget::DrawSkybox()
 	glBindVertexArray(0);
 }
 
-/*###################################################
-##  函数: initSkybox
-##  函数描述： 天空盒部分VBO初始化
-##  参数描述： 无
-#####################################################*/
 void MyGLWidget::initSkybox()
 {
 	// skybox VAO
