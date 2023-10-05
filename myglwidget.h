@@ -61,15 +61,10 @@ protected:
 
     /* 各部件绘制函数 */
 
-    // 绘制船体和收银台
     void drawCashier();
-    // 绘制餐厅
     void drawRestaurant();
-    // 绘制天空盒
     void drawSkybox();
-    // 绘制桌子
     void drawDesk();
-    // 绘制椅子
     void drawChair();
 
     /* 基本形状绘制函数 */

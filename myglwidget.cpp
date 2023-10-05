@@ -779,23 +779,11 @@ void MyGLWidget::initCube()
 
 void MyGLWidget::initSemicylinder()
 {
-	// 两个三角形 作为半圆迭代的开始
-	GLfloat temp[2 * 3 * 3] =
-	{
-		 0.0f,  0.0f,  0.0f,
-		 0.0f,  0.0f,  1.0f,
-		-1.0f,  0.0f,  0.0f,
-
-		 0.0f,  0.0f,  0.0f,
-		-1.0f,  0.0f,  0.0f,
-		 0.0f,  0.0f, -1.0f,
-	};
-
-	// 将temp中的顶点信息保存到semisircleVertices中
+	// 将initialTriangle中前两个三角形的顶点信息保存到semisircleVertices中
 	semicircleVertices.resize(2 * 3 * 3);
 	for (int i = 0; i < 2 * 3 * 3; i++)
 	{
-		semicircleVertices[i] = temp[i];
+		semicircleVertices[i] = initialTriangle[i];
 	}
 
 	// 迭代10次 函数调用完成后semicircleVertices中保存了绘制半圆的顶点信息
@@ -985,31 +973,11 @@ void MyGLWidget::initSemicylinder()
 
 void MyGLWidget::initCylinder()
 {
-	// 四个三角形，作为圆迭代的开始
-	GLfloat temp[4 * 3 * 3] =
-	{
-		0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f,
-		-1.0f, 0.0f, 0.0f,
-
-		0.0f, 0.0f, 0.0f,
-		-1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, -1.0f,
-
-		0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, -1.0f,
-		1.0f, 0.0f, 0.0f,
-
-		0.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f,
-	};
-
-	// 将temp中的顶点信息保存到circleVertices中
+	// 将initialTriangle中的顶点信息保存到circleVertices中
 	circleVertices.resize(4 * 3 * 3);
 	for (int i = 0; i < 4 * 3 * 3; i++)
 	{
-		circleVertices[i] = temp[i];
+		circleVertices[i] = initialTriangle[i];
 	}
 
 	// 迭代10次 函数调用完成后circleVertices中保存了绘制圆的顶点信息
@@ -1162,31 +1130,11 @@ void MyGLWidget::initCylinder()
 
 void MyGLWidget::initTaper()
 {
-	// 四个三角形 作为圆迭代的开始
-	GLfloat temp[4 * 3 * 3] =
-	{
-		0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f,
-		0.0f, 1.0f, 0.0f,
-
-		0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, -1.0f,
-
-		0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, -1.0f,
-		0.0f, -1.0f, 0.0f,
-
-		0.0f, 0.0f, 0.0f,
-		0.0f, -1.0f, 0.0f,
-		0.0f, 0.0f, 1.0f,
-	};
-
 	// 将temp中的顶点信息保存到taperdownVertices中
 	taperdownVertices.resize(4 * 3 * 3);
 	for (int i = 0; i < 4 * 3 * 3; i++)
 	{
-		taperdownVertices[i] = temp[i];
+		taperdownVertices[i] = initialTriangleVertical[i];
 	}
 	subdivideTriangle(ITERATIONS, taperdownVertices, 1);
 
@@ -1224,11 +1172,11 @@ void MyGLWidget::initTaper()
 			va3[j] = lowerVertices[i * 18 + j + 12];
 		}
 
-		addVertex(va2[0], va2[1], va2[2], sideVertices); // 位置
-		addVertex(v2[0] + 0.25f, v2[1], v2[2], sideVertices); // 法向量
-		addVertex(va3[0], va3[1], va3[2], sideVertices); // 位置
-		addVertex(v3[0] + 0.25f, v3[1], v3[2], sideVertices); // 法向量
-		addVertex(4.0f, 0.0f, 0.0f, sideVertices); // 位置
+		addVertex(va2[0], va2[1], va2[2], sideVertices);		// 位置
+		addVertex(v2[0] + 0.25f, v2[1], v2[2], sideVertices);	// 法向量
+		addVertex(va3[0], va3[1], va3[2], sideVertices);		// 位置
+		addVertex(v3[0] + 0.25f, v3[1], v3[2], sideVertices);	// 法向量
+		addVertex(4.0f, 0.0f, 0.0f, sideVertices);				// 位置
 		addVertex((v2[0] + v3[0]) / 2 + 0.25f, (v2[1] + v3[1]) / 2, (v2[2] + v3[2]) / 2, sideVertices); //法向量
 	}
 
@@ -1257,51 +1205,13 @@ void MyGLWidget::initTaper()
 
 void MyGLWidget::initOval()
 {
-	// 四个三角形，作为圆迭代的开始
-	GLfloat tempup[4 * 3 * 3] =
-	{
-		0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 3.0f,
-		-3.0f, 0.0f, 0.0f,
-
-		0.0f, 0.0f, 0.0f,
-		-3.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, -3.0f,
-
-		0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, -3.0f,
-		3.0f, 0.0f, 0.0f,
-
-		0.0f, 0.0f, 0.0f,
-		3.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 3.0f,
-	};
-
-	GLfloat tempdown[4 * 3 * 3] =
-	{
-		0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 3.5f,
-		-3.5f, 0.0f, 0.0f,
-
-		0.0f, 0.0f, 0.0f,
-		-3.5f, 0.0f, 0.0f,
-		0.0f, 0.0f, -3.5f,
-
-		0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, -3.5f,
-		3.5f, 0.0f, 0.0f,
-
-		0.0f, 0.0f, 0.0f,
-		3.5f, 0.0f, 0.0f,
-		0.0f, 0.0f, 3.5f,
-	};
-
 	ovalupVertices.resize(4 * 3 * 3);
 	ovaldownVertices.resize(4 * 3 * 3);
 	for (int i = 0; i < 4 * 3 * 3; i++)
 	{
-		ovalupVertices[i] = tempup[i];
-		ovaldownVertices[i] = tempdown[i];
+		// 指定上下底面两个圆的半径
+		ovalupVertices[i] = initialTriangle[i] * 3;
+		ovaldownVertices[i] = initialTriangle[i] * 3.5;
 	}
 
 	subdivideTriangle(ITERATIONS, ovalupVertices, 3);
@@ -1458,51 +1368,12 @@ void MyGLWidget::initOval()
 
 void MyGLWidget::initCone()
 {
-	// 四个三角形，作为圆迭代的开始
-	GLfloat tempup[4 * 3 * 3] =
-	{
-		0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 3.5f,
-		-3.5f, 0.0f, 0.0f,
-
-		0.0f, 0.0f, 0.0f,
-		-3.5f, 0.0f, 0.0f,
-		0.0f, 0.0f, -3.5f,
-
-		0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, -3.5f,
-		3.5f, 0.0f, 0.0f,
-
-		0.0f, 0.0f, 0.0f,
-		3.5f, 0.0f, 0.0f,
-		0.0f, 0.0f, 3.5f,
-	};
-
-	GLfloat tempdown[4 * 3 * 3] =
-	{
-		0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 4.0f,
-		-4.0f, 0.0f, 0.0f,
-
-		0.0f, 0.0f, 0.0f,
-		-4.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, -4.0f,
-
-		0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, -4.0f,
-		4.0f, 0.0f, 0.0f,
-
-		0.0f, 0.0f, 0.0f,
-		4.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 4.0f,
-	};
-
 	coneupVertices.resize(4 * 3 * 3);
 	conedownVertices.resize(4 * 3 * 3);
 	for (int i = 0; i < 4 * 3 * 3; i++)
 	{
-		coneupVertices[i] = tempup[i];
-		conedownVertices[i] = tempdown[i];
+		coneupVertices[i] = initialTriangle[i] * 3.5;
+		conedownVertices[i] = initialTriangle[i] * 4;
 	}
 
 	subdivideTriangle(ITERATIONS, coneupVertices, 3.5);
