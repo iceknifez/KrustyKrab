@@ -123,17 +123,15 @@ private:
 
     /* ******************** 形状顶点信息 ******************** */
 
-    GLuint cubeVBO; // 保存了绘制正方体的信息 包括顶点位置和法向量
-    GLuint cubeVAO; // 保存了绘制正方体的信息 用于管理顶点属性的状态
+    GLuint cubeVBO;         // 保存了绘制正方体的信息 包括顶点位置和法向量
+    GLuint cubeVAO;         // 保存了绘制正方体的信息 用于管理顶点属性的状态
     GLuint semicylinderVBO; // 保存了绘制半圆柱体的信息 包括顶点位置和法向量
     GLuint semicylinderVAO; // 保存了绘制半圆柱体的信息 用于管理顶点属性的状态
 
-    GLuint outButtomVBO;
-    GLuint outButtomVAO;
-    GLuint quadsVBO;
-    GLuint quadsVAO;
-    GLuint skyboxVAO;
-    GLuint skyboxVBO;
+    GLuint quadsVBO;    // 保存了绘制餐厅的信息 包括顶点位置和法向量
+    GLuint quadsVAO;    // 保存了绘制餐厅的信息 用于管理顶点属性的状态
+    GLuint skyboxVAO;   // 保存了绘制天空盒的信息 包括顶点位置和法向量
+    GLuint skyboxVBO;   // 保存了绘制天空盒的信息 用于管理顶点属性的状态
 
     GLuint cylinderVBO; // 保存了绘制圆柱体的信息 包括顶点位置和法向量
     GLuint cylinderVAO; // 保存了绘制圆柱体的信息 用于管理顶点属性的状态
@@ -146,9 +144,12 @@ private:
 
     int vertexNumOfSemicylinder;    // 绘制半圆柱体所需的顶点数量
     int vertexNumOfCylinder;        // 绘制圆柱体所需的顶点数量
-    int vertexNumOfTaper;           // 绘制圆锥所需的顶点数量
+    int vertexNumOfCone;            // 绘制圆锥所需的顶点数量
     int vertexNumOfFrustum1;        // 绘制圆台(较缓)所需的顶点数量
     int vertexNumOfFrustum2;        // 绘制圆台(较陡)所需的顶点数量
+
+    // 记录环半径（由innerRadius * OutEadius得到key）到半圆环的VAO的映射关系
+    std::unordered_map<float, GLuint> radius2torusVAO;
 
     /* ******************** 状态信息 ******************** */
 

@@ -7,7 +7,7 @@ MyGLWidget::MyGLWidget(QWidget* parent)
 {
 	resize(1280, 800);
 	timer = new QTimer(this); // 实例化一个定时器
-	timer->start(50); // 时间间隔设置为50ms，可以根据需要调整
+	timer->start(16); // 时间间隔设置为50ms，可以根据需要调整
 	connect(timer, SIGNAL(timeout()), this, SLOT(update())); // 连接update()函数，每16ms触发一次update()函数进行重新绘图
 }
 
@@ -385,7 +385,7 @@ void MyGLWidget::rotateViewDes(bool turnRight)
 void MyGLWidget::setCamera(int key)
 {
 	// 上下左右移动相机
-	float speed = 10.0f;
+	float speed = 7.0f;
 	//printf("%d\n", ch);
 	float xRate2 = -zRate, zRate2 = xRate; // 向后的方向 即向右的方向顺时针旋转90度
 	switch (key)
@@ -497,7 +497,6 @@ void MyGLWidget::drawRestaurant() {
 	glPopMatrix();
 
 	useTexture = 0;
-
 }
 
 void MyGLWidget::drawDesk()
@@ -673,7 +672,7 @@ void MyGLWidget::drawCone(float tx, float ty, float tz, float angle, float rx, f
 	updateShader();
 
 	glBindVertexArray(coneVAO);
-	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfTaper);
+	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfCone);
 	glBindVertexArray(coneVAO);
 	glPopMatrix();
 }
@@ -682,68 +681,77 @@ void MyGLWidget::drawCone(float tx, float ty, float tz, float angle, float rx, f
 void MyGLWidget::drawTorus(float innerRadius, float OutRadius) {
 	const int Sides = 100;
 	const int Rings = 100;
-	float verties[8 * (Sides + 1) * (Rings + 1) * 2];
-	float alphaStep = (float)(PI / Sides); // 只画半圆环,不用乘2
-	float BetaStep = (float)(2 * PI / Sides);
-	float beta = 0;
-	float alpha = 0;
-	float x0, x1, y0, y1, z0, z1, x2, y2, z2;
-	float nor[3];
-	float r = (OutRadius - innerRadius) / 2; // 圆环的半径
-	int index = 0;
-	for (int i = 0; i <= Sides; i++) {
-		alpha = i * alphaStep;
-		for (int j = 0; j <= Rings; j++) {
-			beta = j * BetaStep;
-			x0 = (float)(cos(alpha) * (r + innerRadius + r * cos(beta)));
-			y0 = (float)(sin(alpha) * (r + innerRadius + r * cos(beta)));
-			z0 = (float)(r * sin(beta));
-			x1 = (float)(cos(alpha + alphaStep) * (r + innerRadius + r * cos(beta)));
-			y1 = (float)(sin(alpha + alphaStep) * (r + innerRadius + r * cos(beta)));
-			z1 = (float)(r * sin(beta));
-			nor[0] = (float)(cos(alpha) * cos(beta));
-			nor[1] = (float)(sin(alpha) * cos(beta));
-			nor[2] = (float)(sin(beta));
-			verties[index++] = x0;
-			verties[index++] = y0;
-			verties[index++] = z0;
-			verties[index++] = nor[0];
-			verties[index++] = nor[1];
-			verties[index++] = nor[2];
-			verties[index++] = ((float)2 * i / Rings);
-			verties[index++] = (float)j / Rings;
+	GLuint torusVBO;
+	GLuint torusVAO;
+	float key = innerRadius * OutRadius;
+	if (!radius2torusVAO.count(key)) {
+		// 如果之前没有生成过innerRadius和OutRadius对应的VAO 则生成新的VAO并记录半径与VAO的映射关系
+		std::vector<GLfloat> torusVertices(8 * (Sides + 1) * (Rings + 1) * 2);
+		float alphaStep = (float)(PI / Sides); // 只画半圆环,不用乘2
+		float BetaStep = (float)(2 * PI / Sides);
+		float beta = 0;
+		float alpha = 0;
+		float x0, x1, y0, y1, z0, z1, x2, y2, z2;
+		float nor[3];
+		float r = (OutRadius - innerRadius) / 2; // 圆环的半径
+		int index = 0;
+		for (int i = 0; i <= Sides; i++) {
+			alpha = i * alphaStep;
+			for (int j = 0; j <= Rings; j++) {
+				beta = j * BetaStep;
+				x0 = (float)(cos(alpha) * (r + innerRadius + r * cos(beta)));
+				y0 = (float)(sin(alpha) * (r + innerRadius + r * cos(beta)));
+				z0 = (float)(r * sin(beta));
+				x1 = (float)(cos(alpha + alphaStep) * (r + innerRadius + r * cos(beta)));
+				y1 = (float)(sin(alpha + alphaStep) * (r + innerRadius + r * cos(beta)));
+				z1 = (float)(r * sin(beta));
+				nor[0] = (float)(cos(alpha) * cos(beta));
+				nor[1] = (float)(sin(alpha) * cos(beta));
+				nor[2] = (float)(sin(beta));
+				torusVertices[index++] = x0;
+				torusVertices[index++] = y0;
+				torusVertices[index++] = z0;
+				torusVertices[index++] = nor[0];
+				torusVertices[index++] = nor[1];
+				torusVertices[index++] = nor[2];
+				torusVertices[index++] = ((float)2 * i / Rings);
+				torusVertices[index++] = (float)j / Rings;
 
-			nor[0] = (float)(cos(alpha + alphaStep) * cos(beta));
-			nor[1] = (float)(sin(alpha + alphaStep) * cos(beta));
-			nor[2] = (float)(sin(beta));
-			verties[index++] = x1;
-			verties[index++] = y1;
-			verties[index++] = z1;
-			verties[index++] = nor[0];
-			verties[index++] = nor[1];
-			verties[index++] = nor[2];
-			verties[index++] = ((float)2 * i / Rings);
-			verties[index++] = (float)j / Rings;
+				nor[0] = (float)(cos(alpha + alphaStep) * cos(beta));
+				nor[1] = (float)(sin(alpha + alphaStep) * cos(beta));
+				nor[2] = (float)(sin(beta));
+				torusVertices[index++] = x1;
+				torusVertices[index++] = y1;
+				torusVertices[index++] = z1;
+				torusVertices[index++] = nor[0];
+				torusVertices[index++] = nor[1];
+				torusVertices[index++] = nor[2];
+				torusVertices[index++] = ((float)2 * i / Rings);
+				torusVertices[index++] = (float)j / Rings;
+			}
 		}
+		
+		// 生成VAO和VBO并绑定
+		glGenVertexArrays(1, &torusVAO);
+		glBindVertexArray(torusVAO);
+		glGenBuffers(1, &torusVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, torusVBO);
+		// 把之前定义的顶点数据复制到缓冲的内存中
+		glBufferData(GL_ARRAY_BUFFER, torusVertices.size() * sizeof(GLfloat), &torusVertices[0], GL_STATIC_DRAW);
+		// 设置顶点属性指针
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(2);
+		// 记录环半径与VAO的映射关系
+		radius2torusVAO[key] = torusVAO;
+	} else {
+		torusVAO = radius2torusVAO[key];
+		glBindVertexArray(torusVAO);
 	}
-	// 生成VAO和VBO并绑定
-	glGenVertexArrays(1, &outButtomVAO);
-	glBindVertexArray(outButtomVAO);
-	glGenBuffers(1, &outButtomVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, outButtomVBO);
-	// 把之前定义的顶点数据复制到缓冲的内存中
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verties), verties, GL_STATIC_DRAW);
-	// 设置顶点属性指针
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(2);
-	// 解绑VAO
-	glBindVertexArray(0);
-
-	glBindVertexArray(outButtomVAO);
+	
 	updateShader();
 	glDrawArrays(GL_QUAD_STRIP, 0, 2 * (Sides + 1) * (Rings + 1));
 	glBindVertexArray(0);
@@ -1075,7 +1083,7 @@ void MyGLWidget::initTaper()
 	taperVertices.insert(taperVertices.end(), lowerVertices.begin(), lowerVertices.end());
 	taperVertices.insert(taperVertices.end(), sideVertices.begin(), sideVertices.end());
 
-	vertexNumOfTaper = taperVertices.size() / 2 / 3;
+	vertexNumOfCone = taperVertices.size() / 2 / 3;
 
 	// 创建VAO并绑定
 	glGenVertexArrays(1, &coneVAO);
