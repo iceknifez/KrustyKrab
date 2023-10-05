@@ -483,18 +483,8 @@ void MyGLWidget::drawRestaurant() {
 	drawCylinder(-34.0f, 40.0f, 14.0f, 4.0f, 60.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);	// 柱子4
 
 	// 绘制圆环
-	glPushMatrix();
-	glTranslatef(34.0, 70.0f, -5.0f);
-	glRotatef(90, 0, 1.0, 0.0);
-	drawTorus(15, 23);
-	glPopMatrix();
-
-	// 绘制圆环
-	glPushMatrix();
-	glTranslatef(-34.0, 70.0f, -5.0f);
-	glRotatef(90, 0, 1.0, 0.0);
-	drawTorus(15, 23);
-	glPopMatrix();
+	drawTorus(15, 23, 34.0, 70.0f, -5.0f, 1.0f, 1.0f, 1.0f, 90.0f, 0.0f, 1.0f, 0.0f);
+	drawTorus(15, 23, -34.0, 70.0f, -5.0f, 1.0f, 1.0f, 1.0f, 90.0f, 0.0f, 1.0f, 0.0f);
 
 	useTexture = 0;
 }
@@ -513,12 +503,12 @@ void MyGLWidget::drawDesk()
 	// 六个装饰
 	useTexture = 0;
 	setObjectColor(192 / 255.0f, 0.0f, 0.0f);
-	drawCone(-19.0f, 21.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	drawCone(-9.5f, 21.0f, 16.45f, 60.0f, 0.0f, 1.0f, 0.0f);
-	drawCone(9.5f, 21.0f, 16.45f, 120.0f, 0.0f, 1.0f, 0.0f);
-	drawCone(19.0f, 21.0f, 0.0f, 180.0f, 0.0f, 1.0f, 0.0f);
-	drawCone(9.5f, 21.0f, -16.45f, 240.0f, 0.0f, 1.0f, 0.0f);
-	drawCone(-9.5f, 21.0f, -16.45f, 300.0f, 0.0f, 1.0f, 0.0f);
+	drawCone(-19.0f, 21.0f, 0.0f);
+	drawCone(-9.5f, 21.0f, 16.45f, 1.0f, 1.0f, 1.0f, 60.0f, 0.0f, 1.0f, 0.0f);
+	drawCone(9.5f, 21.0f, 16.45f, 1.0f, 1.0f, 1.0f, 120.0f, 0.0f, 1.0f, 0.0f);
+	drawCone(19.0f, 21.0f, 0.0f, 1.0f, 1.0f, 1.0f, 180.0f, 0.0f, 1.0f, 0.0f);
+	drawCone(9.5f, 21.0f, -16.45f, 1.0f, 1.0f, 1.0f, 240.0f, 0.0f, 1.0f, 0.0f);
+	drawCone(-9.5f, 21.0f, -16.45f, 1.0f, 1.0f, 1.0f, 300.0f, 0.0f, 1.0f, 0.0f);
 }
 
 void MyGLWidget::drawChair()
@@ -526,61 +516,27 @@ void MyGLWidget::drawChair()
 	// 绘制桶上沿
 	useTexture = 1;
 	setDiffuseMap("img/chair1.png");
-	glPushMatrix();
-	glTranslatef(0.0f, 12.0f, 0.0f);
-	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-	updateShader();
-	drawTorus(2.5, 3);
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(0.0f, 12.0f, 0.0f);
-	glRotatef(90.0f, -1.0f, 0.0f, 0.0f);
-	updateShader();
-	drawTorus(2.5, 3);
-	glPopMatrix();
+	drawTorus(2.5f, 3.0f, 0.0f, 12.0f, 0.0f, 1.0f, 1.0f, 1.0f, 90.0f, 1.0f, 0.0f, 0.0f);
+	drawTorus(2.5f, 3.0f, 0.0f, 12.0f, 0.0f, 1.0f, 1.0f, 1.0f, 90.0f, -1.0f, 0.0f, 0.0f);
 
 	//绘制水桶
-	drawFrustum1(0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	drawFrustum2(0.0f, 7.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	drawFrustum1(0.0f, 10.0f, 0.0f);
+	drawFrustum2(0.0f, 7.0f, 0.0f);
 	glPushMatrix();
 	glRotatef(177.0f, 0.0f, 1.0f, 0.0f);
-	drawFrustum2(0.0f, 5.0f, 0.0f, 180.0f, 1.0f, 0.0f, 0.0f);
-	drawFrustum1(0.0f, 2.0f, 0.0f, 180.0f, 1.0f, 0.0f, 0.0f);
+	drawFrustum2(0.0f, 5.0f, 0.0f, 1.0f, 1.0f, 1.0f, 180.0f, 1.0f, 0.0f, 0.0f);
+	drawFrustum1(0.0f, 2.0f, 0.0f, 1.0f, 1.0f, 1.0f, 180.0f, 1.0f, 0.0f, 0.0f);
 	glPopMatrix();
 	setDiffuseMap("img/chair1_rotate.png");
 	drawCylinder(0.0f, 6.0f, 0.0f, 4.0f, 2.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	// 绘制桶的铁环
 	setDiffuseMap("img/chair2.png");
-	glPushMatrix();
-	glTranslatef(0.0f, 10.0f, 0.0f);
-	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-	updateShader();
-	drawTorus(3.1, 3.7);
-	glPopMatrix();
+	drawTorus(3.1f, 3.7f, 0.0f, 10.0f, 0.0f, 1.0f, 1.0f, 1.0f, 90.0f, 1.0f, 0.0f, 0.0f);
+	drawTorus(3.1f, 3.7f, 0.0f, 10.0f, 0.0f, 1.0f, 1.0f, 1.0f, 90.0f, -1.0f, 0.0f, 0.0f);
 
-	glPushMatrix();
-	glTranslatef(0.0f, 10.0f, 0.0f);
-	glRotatef(90.0f, -1.0f, 0.0f, 0.0f);
-	updateShader();
-	drawTorus(3.1, 3.7);
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(0.0f, 2.0f, 0.0f);
-	glRotatef(90.0f, -1.0f, 0.0f, 0.0f);
-	updateShader();
-	drawTorus(3.1, 3.7);
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(0.0f, 2.0f, 0.0f);
-	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-	updateShader();
-	drawTorus(3.1, 3.7);
-	glPopMatrix();
-
+	drawTorus(3.1f, 3.7f, 0.0f, 2.0f, 0.0f, 1.0f, 1.0f, 1.0f, 90.0f, -1.0f, 0.0f, 0.0f);
+	drawTorus(3.1f, 3.7f, 0.0f, 2.0f, 0.0f, 1.0f, 1.0f, 1.0f, 90.0f, 1.0f, 0.0f, 0.0f);
 }
 
 void MyGLWidget::drawSkybox()
@@ -638,10 +594,12 @@ void MyGLWidget::drawCylinder(float tx, float ty, float tz, float sx, float sy, 
 	glPopMatrix();
 }
 
-void MyGLWidget::drawFrustum1(float tx, float ty, float tz, float angle, float rx, float ry, float rz)
+void MyGLWidget::drawFrustum1(float tx, float ty, float tz, float sx, float sy, float sz,
+	float angle, float rx, float ry, float rz)
 {
 	glPushMatrix();
 	glTranslatef(tx, ty, tz);
+	glScalef(sx, sy, sz);
 	glRotatef(angle, rx, ry, rz);
 	updateShader();
 
@@ -651,10 +609,12 @@ void MyGLWidget::drawFrustum1(float tx, float ty, float tz, float angle, float r
 	glPopMatrix();
 }
 
-void MyGLWidget::drawFrustum2(float tx, float ty, float tz, float angle, float rx, float ry, float rz)
+void MyGLWidget::drawFrustum2(float tx, float ty, float tz, float sx, float sy, float sz,
+	float angle, float rx, float ry, float rz)
 {
 	glPushMatrix();
 	glTranslatef(tx, ty, tz);
+	glScalef(sx, sy, sz);
 	glRotatef(angle, rx, ry, rz);
 	updateShader();
 
@@ -664,33 +624,42 @@ void MyGLWidget::drawFrustum2(float tx, float ty, float tz, float angle, float r
 	glPopMatrix();
 }
 
-void MyGLWidget::drawCone(float tx, float ty, float tz, float angle, float rx, float ry, float rz)
+void MyGLWidget::drawCone(float tx, float ty, float tz, float sx, float sy, float sz,
+	float angle, float rx, float ry, float rz)
 {
 	glPushMatrix();
 	glTranslatef(tx, ty, tz);
+	glScalef(sx, sy, sz);
 	glRotatef(angle, rx, ry, rz);
 	updateShader();
 
 	glBindVertexArray(coneVAO);
 	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfCone);
-	glBindVertexArray(coneVAO);
+	glBindVertexArray(0);
 	glPopMatrix();
 }
 
 // 绘制三维立体半圆环 innerRadius:内环半径，OutEadius：外环半径，Sides和Rings都是切割数
-void MyGLWidget::drawTorus(float innerRadius, float outRadius) {
+void MyGLWidget::drawTorus(float innerRadius, float outRadius,
+	float tx, float ty, float tz, float sx, float sy, float sz,
+	float angle, float rx, float ry, float rz) {
 	const int SIDES = 100;
 	const int RINGS = 100;
 	float key = innerRadius * outRadius;
 	if (!radius2torusVAO.count(key))
 		initTorus(innerRadius, outRadius);
-
 	GLuint torusVAO = radius2torusVAO[key];
-	glBindVertexArray(torusVAO);
-	
+
+	glPushMatrix();
+	glTranslatef(tx, ty, tz);
+	glScalef(sx, sy, sz);
+	glRotatef(angle, rx, ry, rz);
 	updateShader();
+
+	glBindVertexArray(torusVAO);
 	glDrawArrays(GL_QUAD_STRIP, 0, 2 * (SIDES + 1) * (RINGS + 1));
 	glBindVertexArray(0);
+	glPopMatrix();
 }
 
 /* ******************** 初始化相关函数 ******************** */

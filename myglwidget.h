@@ -70,22 +70,34 @@ protected:
     /* ******************** 基本形状绘制函数 ******************** */
 
     // 根据指定的位移和缩放绘制长方体
-    void drawCuboid(float tx, float ty, float tz, float sx, float sy, float sz,
+    void drawCuboid(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f, 
+        float sx = 1.0f, float sy = 1.0f, float sz = 1.0f,
         float angle = 0.0f, float rx = 0.0f, float ry = 0.0f, float rz = 0.0f);
     // 根据指定的位移和缩放绘制半圆柱体
-    void drawSemicylinder(float tx, float ty, float tz, float sx, float sy, float sz,
+    void drawSemicylinder(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f, 
+        float sx = 1.0f, float sy = 1.0f, float sz = 1.0f,
         float angle = 0.0f, float rx = 0.0f, float ry = 0.0f, float rz = 0.0f);
     // 根据指定的位移和缩放绘制圆柱体
-    void drawCylinder(float tx, float ty, float tz, float sx, float sy, float sz,
-        float angle, float rx, float ry, float rz);
+    void drawCylinder(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f, 
+        float sx = 1.0f, float sy = 1.0f, float sz = 1.0f,
+        float angle = 0.0f, float rx = 0.0f, float ry = 0.0f, float rz = 0.0f);
     // 根据指定的位移绘制圆台体(较缓)
-    void drawFrustum1(float tx, float ty, float tz, float angle, float rx, float ry, float rz);
+    void drawFrustum1(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f, 
+        float sx = 1.0f, float sy = 1.0f, float sz = 1.0f,
+        float angle = 0.0f, float rx = 0.0f, float ry = 0.0f, float rz = 0.0f);
     // 根据指定的位移绘制圆台体(较陡)
-    void drawFrustum2(float tx, float ty, float tz, float angle, float rx, float ry, float rz);
+    void drawFrustum2(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f, 
+        float sx = 1.0f, float sy = 1.0f, float sz = 1.0f,
+        float angle = 0.0f, float rx = 0.0f, float ry = 0.0f, float rz = 0.0f);
     // 绘制圆锥
-    void drawCone(float tx, float ty, float tz, float angle, float rx, float ry, float rz);
+    void drawCone(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f, 
+        float sx = 1.0f, float sy = 1.0f, float sz = 1.0f,
+        float angle = 0.0f, float rx = 0.0f, float ry = 0.0f, float rz = 0.0f);
     // 绘制半圆环
-    void drawTorus(float innerRadius, float OutRadius);
+    void drawTorus(float innerRadius, float OutRadius,
+        float tx = 0.0f, float ty = 0.0f, float tz = 0.0f, 
+        float sx = 1.0f, float sy = 1.0f, float sz = 1.0f,
+        float angle = 0.0f, float rx = 0.0f, float ry = 0.0f, float rz = 0.0f);
 
     /* ******************** 初始化相关函数 ******************** */
 
