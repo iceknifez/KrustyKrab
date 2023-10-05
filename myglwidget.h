@@ -95,11 +95,13 @@ protected:
     void initSemicylinder();
     // 初始化cylinderVBO和cylinderVAO 保存了绘制圆柱体的信息
     void initCylinder();
-    // 初始化taperVBO和taperVAO 保存了绘制圆锥体的信息
-    void initTaper();
+    // 初始化coneVBO和coneVAO 保存了绘制圆锥体的信息
+    void initCone();
     // 初始化givenVAO和givenVBO 保存了绘制上圆半径upperRadius下圆半径lowerRadius的圆台的信息
     void initFrustum(GLuint &givenVAO, GLuint &givenVBO, int &vertexNum,
         float upperRadius = 1.0f, float lowerRadius = 1.0f, float height = 1.0f);
+    // 初始化torusVBO和torusVAO 并将半径和VAO的映射关系保存到radius2torusVAO中
+    void initTorus(float innerRadius, float outRadius, const int SIDES = 100, const int RINGS = 100);
     // 初始化绘制餐厅所需信息
     void initRestaurant();
     // 初始化绘制天空盒所需信息
