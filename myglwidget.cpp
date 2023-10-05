@@ -549,94 +549,64 @@ void MyGLWidget::drawSkybox()
 
 /* ******************** 基本形状绘制函数 ******************** */
 
-void MyGLWidget::drawCuboid(float tx, float ty, float tz, float sx, float sy, float sz,
+// 由其他draw函数调用 实现统一的图形绘制功能
+void MyGLWidget::_drawShape(GLuint givenVAO, GLenum mod, GLsizei count, 
+	float tx, float ty, float tz, float sx, float sy, float sz, 
 	float angle, float rx, float ry, float rz)
 {
 	glPushMatrix();
 	glTranslatef(tx, ty, tz);
 	glScalef(sx, sy, sz);
 	glRotatef(angle, rx, ry, rz);
+
 	updateShader();
 
-	glBindVertexArray(cubeVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+	glBindVertexArray(givenVAO);
+	glDrawArrays(mod, 0, count);
 	glBindVertexArray(0);
 	glPopMatrix();
+}
+
+void MyGLWidget::drawCuboid(float tx, float ty, float tz, float sx, float sy, float sz,
+	float angle, float rx, float ry, float rz)
+{
+	_drawShape(cubeVAO, GL_TRIANGLES, 12 * 3, 
+		tx, ty, tz, sx, sy, sz, angle, rx, ry, rz);
 }
 
 void MyGLWidget::drawSemicylinder(float tx, float ty, float tz, float sx, float sy, float sz,
 	float angle, float rx, float ry, float rz)
 {
-	glPushMatrix();
-	glTranslatef(tx, ty, tz);
-	glScalef(sx, sy, sz);
-	glRotatef(angle, rx, ry, rz);
-	updateShader();
-
-	glBindVertexArray(semicylinderVAO);
-	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfSemicylinder);
-	glBindVertexArray(0);
-	glPopMatrix();
+	_drawShape(semicylinderVAO, GL_TRIANGLES, vertexNumOfSemicylinder,
+		tx, ty, tz, sx, sy, sz, angle, rx, ry, rz);
 }
 
 void MyGLWidget::drawCylinder(float tx, float ty, float tz, float sx, float sy, float sz,
 	float angle, float rx, float ry, float rz)
 {
-	glPushMatrix();
-	glTranslatef(tx, ty, tz);
-	glScalef(sx, sy, sz);
-	glRotatef(angle, rx, ry, rz);
-	updateShader();
-
-	glBindVertexArray(cylinderVAO);
-	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfCylinder);
-	glBindVertexArray(0);
-	glPopMatrix();
+	_drawShape(cylinderVAO, GL_TRIANGLES, vertexNumOfCylinder,
+		tx, ty, tz, sx, sy, sz, angle, rx, ry, rz);
 }
 
 void MyGLWidget::drawFrustum1(float tx, float ty, float tz, float sx, float sy, float sz,
 	float angle, float rx, float ry, float rz)
 {
-	glPushMatrix();
-	glTranslatef(tx, ty, tz);
-	glScalef(sx, sy, sz);
-	glRotatef(angle, rx, ry, rz);
-	updateShader();
-
-	glBindVertexArray(frustumVAO1);
-	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfFrustum1);
-	glBindVertexArray(0);
-	glPopMatrix();
+	_drawShape(frustumVAO1, GL_TRIANGLES, vertexNumOfFrustum1,
+		tx, ty, tz, sx, sy, sz, angle, rx, ry, rz);
 }
 
 void MyGLWidget::drawFrustum2(float tx, float ty, float tz, float sx, float sy, float sz,
 	float angle, float rx, float ry, float rz)
 {
-	glPushMatrix();
-	glTranslatef(tx, ty, tz);
-	glScalef(sx, sy, sz);
-	glRotatef(angle, rx, ry, rz);
-	updateShader();
-
-	glBindVertexArray(frustumVAO2);
-	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfFrustum2);
-	glBindVertexArray(0);
-	glPopMatrix();
+	_drawShape(frustumVAO2, GL_TRIANGLES, vertexNumOfFrustum2,
+		tx, ty, tz, sx, sy, sz, angle, rx, ry, rz);
 }
 
 void MyGLWidget::drawCone(float tx, float ty, float tz, float sx, float sy, float sz,
 	float angle, float rx, float ry, float rz)
 {
-	glPushMatrix();
-	glTranslatef(tx, ty, tz);
-	glScalef(sx, sy, sz);
-	glRotatef(angle, rx, ry, rz);
-	updateShader();
-
-	glBindVertexArray(coneVAO);
-	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfCone);
-	glBindVertexArray(0);
-	glPopMatrix();
+	_drawShape(coneVAO, GL_TRIANGLES, vertexNumOfCone,
+		tx, ty, tz, sx, sy, sz, angle, rx, ry, rz);
 }
 
 // 绘制三维立体半圆环 innerRadius:内环半径，OutEadius：外环半径，Sides和Rings都是切割数
@@ -650,16 +620,8 @@ void MyGLWidget::drawTorus(float innerRadius, float outRadius,
 		initTorus(innerRadius, outRadius);
 	GLuint torusVAO = radius2torusVAO[key];
 
-	glPushMatrix();
-	glTranslatef(tx, ty, tz);
-	glScalef(sx, sy, sz);
-	glRotatef(angle, rx, ry, rz);
-	updateShader();
-
-	glBindVertexArray(torusVAO);
-	glDrawArrays(GL_QUAD_STRIP, 0, 2 * (SIDES + 1) * (RINGS + 1));
-	glBindVertexArray(0);
-	glPopMatrix();
+	_drawShape(torusVAO, GL_QUAD_STRIP, 2 * (SIDES + 1) * (RINGS + 1),
+		tx, ty, tz, sx, sy, sz, angle, rx, ry, rz);
 }
 
 /* ******************** 初始化相关函数 ******************** */

@@ -69,6 +69,13 @@ protected:
 
     /* ******************** 基本形状绘制函数 ******************** */
 
+private:
+    // 私有函数 由其他draw函数调用 实现统一的图形绘制功能
+    void _drawShape(GLuint givenVAO, GLenum mod, GLsizei count,
+        float tx, float ty, float tz, float sx, float sy, float sz,
+        float angle, float rx, float ry, float rz);
+
+protected:
     // 根据指定的位移和缩放绘制长方体
     void drawCuboid(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f, 
         float sx = 1.0f, float sy = 1.0f, float sz = 1.0f,
