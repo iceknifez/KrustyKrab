@@ -430,18 +430,18 @@ void MyGLWidget::drawCashier()
 
 	// 船体
 	useTexture = 1;	// 使用漫反射纹理贴图
-	setDiffuseMap("img/boat1.png");
+	setDiffuseMap("img/boat1_2.png");
 	drawCuboid(8 + 30 - 0.5f, 0.0f, 0.0f, 1.0f, 10.0f, 16.0f);	// 后钢板
 	drawCuboid(8 + 0.5f, 0.0f, 0.0f, 1.0f, 10.0f, 16.0f);		// 前钢板
 	drawCuboid(8 + 15.0f, 0.0f, 7.5f, 28.0f, 10.0f, 1.0f);		// 左钢板
 	drawCuboid(8 + 15.0f, 0.0f, -7.5f, 28.0f, 10.0f, 1.0f);		// 右钢板
-	drawCuboid(8 + 15.0f, -4.5f, 0.0f, 28.0f, 1.0f, 14.0f);		// 底板
-	setDiffuseMap("img/boat1_rotate.png");
-	drawSemicylinder(8.0f, 0.0f, 0.0f, 8.0f, 5.0f, 8.0f);	// 船头
+	setDiffuseMap("img/boat1_2_rotate.png");
+	drawSemicylinder(8.0f, 0.0f, 0.0f, 8.0f, 5.0f, 8.0f);		// 船头
 	setDiffuseMap("img/boat2.png");
-	drawCuboid(0.0f, 1.0f, 0.0f, 2.0f, 12.0f, 2.0f);		// 船头柱子
+	drawCuboid(8 + 15.0f, -4.5f, 0.0f, 28.0f, 1.0f, 14.0f);		// 底部钢板
+	drawCuboid(0.0f, 1.0f, 0.0f, 2.0f, 12.0f, 2.0f);			// 船头柱子
 
-	setObjectColor(0.76f, 0.82f, 0.94f);	// 将颜色设置为浅蓝色 (193, 210, 240)
+	//setObjectColor(0.76f, 0.82f, 0.94f);	// 将颜色设置为浅蓝色 (193, 210, 240)
 	drawCuboid(8 + 30 - 1.5f, 3.5f, 0.0f, 1.0f, 1.0f, 14.0f);		// 后突起
 	drawCuboid(8 + 1.5f, 3.5f, 0.0f, 1.0f, 1.0f, 14.0f);			// 前突起
 	drawCuboid(8 + 15.0f, 3.5f, 7.5f - 1.0f, 26.0f, 1.0f, 1.0f);	// 左突起
@@ -463,9 +463,7 @@ void MyGLWidget::drawRestaurant() {
 
 	// 绘制底部、门板和屋顶下部
 	useTexture = 1;	// 使用漫反射纹理贴图
-	//setDiffuseMap("img/wood7.jpg");	// 指定图片
 	setDiffuseMap("img/wood3.png");	// 指定图片
-	//setDiffuseMap("img/test.png");	// 指定图片
 	glPushMatrix();
 	glBindVertexArray(quadsVAO);
 	updateShader();	// 每次进行绘制之前要调用该方法
@@ -479,6 +477,7 @@ void MyGLWidget::drawRestaurant() {
 	// 绘制柱子（半径为4，高为60的圆柱体） 注意后面的柱子先绘制
 	drawCylinder(34.0f, 40.0f, -24.0f, 4.0f, 60.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);	// 柱子2
 	drawCylinder(-34.0f, 40.0f, -24.0f, 4.0f, 60.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);	// 柱子3
+
 	// 绘制两旁的柱子
 	drawCylinder(34.0f, 40.0f, 14.0f, 4.0f, 60.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);	// 柱子1
 	drawCylinder(-34.0f, 40.0f, 14.0f, 4.0f, 60.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);	// 柱子4
@@ -519,8 +518,6 @@ void MyGLWidget::drawDesk()
 	drawTaper(-9.5f, 21.0f, 16.45f, 60.0f, 0.0f, 1.0f, 0.0f);
 	drawTaper(9.5f, 21.0f, 16.45f, 120.0f, 0.0f, 1.0f, 0.0f);
 	drawTaper(19.0f, 21.0f, 0.0f, 180.0f, 0.0f, 1.0f, 0.0f);
-	//drawTaper(9.5f, 0.0f, -16.45f, 60.0f, 0.0f, -1.0f, 0.0f);
-	//drawTaper(-9.5f, 0.0f, -16.45f, 120.0f, 0.0f, -1.0f, 0.0f);
 	drawTaper(9.5f, 21.0f, -16.45f, 240.0f, 0.0f, 1.0f, 0.0f);
 	drawTaper(-9.5f, 21.0f, -16.45f, 300.0f, 0.0f, 1.0f, 0.0f);
 }
@@ -779,6 +776,9 @@ void MyGLWidget::initCube()
 
 void MyGLWidget::initSemicylinder()
 {
+	std::vector<GLfloat> semicircleVertices;    // 保存了半圆顶点位置
+	std::vector<GLfloat> semicylinderVertices;  // 保存了半圆柱体顶点信息 包括位置和法向量
+
 	// 将initialTriangle中前两个三角形的顶点信息保存到semisircleVertices中
 	semicircleVertices.resize(2 * 3 * 3);
 	for (int i = 0; i < 2 * 3 * 3; i++)
@@ -973,6 +973,9 @@ void MyGLWidget::initSemicylinder()
 
 void MyGLWidget::initCylinder()
 {
+    std::vector<GLfloat> circleVertices;    // 保存了圆顶点位置
+    std::vector<GLfloat> cylinderVertices;  // 保存了圆柱体顶点信息 包括位置和法向量
+
 	// 将initialTriangle中的顶点信息保存到circleVertices中
 	circleVertices.resize(4 * 3 * 3);
 	for (int i = 0; i < 4 * 3 * 3; i++)
@@ -1130,6 +1133,9 @@ void MyGLWidget::initCylinder()
 
 void MyGLWidget::initTaper()
 {
+	std::vector<GLfloat> taperVertices;     // 保存了圆锥顶点信息 包括位置和法向量
+	std::vector<GLfloat> taperdownVertices; // 保存了圆锥底部圆顶点位置
+
 	// 将temp中的顶点信息保存到taperdownVertices中
 	taperdownVertices.resize(4 * 3 * 3);
 	for (int i = 0; i < 4 * 3 * 3; i++)
@@ -1205,6 +1211,10 @@ void MyGLWidget::initTaper()
 
 void MyGLWidget::initOval()
 {
+	std::vector<GLfloat> ovalupVertices;    // 保存了椭圆顶部圆顶点位置信息
+	std::vector<GLfloat> ovaldownVertices;  // 保存了椭圆底部圆顶点位置信息
+	std::vector<GLfloat> ovalVertices;      // 保存了椭圆体顶点信息 包括位置和法向量
+
 	ovalupVertices.resize(4 * 3 * 3);
 	ovaldownVertices.resize(4 * 3 * 3);
 	for (int i = 0; i < 4 * 3 * 3; i++)
@@ -1368,10 +1378,15 @@ void MyGLWidget::initOval()
 
 void MyGLWidget::initCone()
 {
+	std::vector<GLfloat> coneupVertices;    // 保存了圆台顶部圆顶点位置信息
+	std::vector<GLfloat> conedownVertices;  // 保存了圆台底部圆顶点位置信息
+	std::vector<GLfloat> coneVertices;      // 保存了圆台体顶点信息 包括位置和法向量
+
 	coneupVertices.resize(4 * 3 * 3);
 	conedownVertices.resize(4 * 3 * 3);
 	for (int i = 0; i < 4 * 3 * 3; i++)
 	{
+		// 指定上下底面两个圆的半径
 		coneupVertices[i] = initialTriangle[i] * 3.5;
 		conedownVertices[i] = initialTriangle[i] * 4;
 	}

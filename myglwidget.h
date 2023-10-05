@@ -128,9 +128,6 @@ private:
     GLuint cubeVAO; // 保存了绘制正方体的信息 用于管理顶点属性的状态
     GLuint semicylinderVBO; // 保存了绘制半圆柱体的信息 包括顶点位置和法向量
     GLuint semicylinderVAO; // 保存了绘制半圆柱体的信息 用于管理顶点属性的状态
-    std::vector<GLfloat> semicircleVertices;    // 保存了半圆顶点位置
-    std::vector<GLfloat> semicylinderVertices;  // 保存了半圆柱体顶点信息 包括位置和法向量
-    int vertexNumOfSemicylinder;    // 绘制半圆柱体所需的顶点数量
 
     GLuint VBOOutButtomId;
     GLuint VAOOutButtomId;
@@ -147,16 +144,8 @@ private:
     GLuint ovalVAO; // 保存了绘制椭圆柱的信息 用于管理顶点属性的状态
     GLuint coneVBO; // 保存了绘制圆台的信息 包括顶点位置和法向量
     GLuint coneVAO; // 保存了绘制圆台的信息 用于管理顶点属性的状态
-    std::vector<GLfloat> circleVertices;    // 保存了圆顶点位置
-    std::vector<GLfloat> cylinderVertices;  // 保存了圆柱体顶点信息 包括位置和法向量
-    std::vector<GLfloat> taperVertices;     // 保存了圆锥顶点信息 包括位置和法向量
-    std::vector<GLfloat> taperdownVertices; // 保存了圆锥底部圆顶点位置
-    std::vector<GLfloat> ovalupVertices;    // 保存了椭圆顶部圆顶点位置信息
-    std::vector<GLfloat> ovaldownVertices;  // 保存了椭圆底部圆顶点位置信息
-    std::vector<GLfloat> ovalVertices;      // 保存了椭圆体定点信息 包括位置和法向量
-    std::vector<GLfloat> coneupVertices;    // 保存了圆台顶部圆顶点位置信息
-    std::vector<GLfloat> conedownVertices;  // 保存了圆台底部圆顶点位置信息
-    std::vector<GLfloat> coneVertices;      // 保存了圆台体定点信息 包括位置和法向量
+
+    int vertexNumOfSemicylinder;    // 绘制半圆柱体所需的顶点数量
     int vertexNumOfCylinder;    // 绘制圆柱体所需的顶点数量
     int vertexNumOfTaper;    // 绘制圆锥所需的顶点数量
     int vertexNumOfOval;    // 绘制椭圆柱体所需的顶点数量
