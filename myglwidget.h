@@ -8,10 +8,11 @@
 #endif
 #include <QtGui>
 #include <QOpenGLWidget>
-//#include <QOpenGLFunctions>
 #include <QOpenGLFunctions_3_3_Core>
 #include <QGLWidget>
 
+#include <QtCore/qdir.h>
+#include <qopenglextrafunctions.h>
 
 #include <iostream>
 #include <fstream>
@@ -41,19 +42,11 @@ protected:
     void initShader(std::string vertexPath, std::string fragmentPath);
     // 更新着色器的信息 每次绘制前调用
     void updateShader();
+
+    /* 状态信息设置函数 */
+
     // 设置漫反射纹理贴图
     void setDiffuseMap(const char* imagePath);
-
-    /* *********************** */
-
-    // 绘制船体和收银台
-    void drawCashier();
-    // 根据指定的位移和缩放绘制长方体
-    void drawCuboid(float tx, float ty, float tz, float sx, float sy, float sz,
-        float angle = 0.0f, float rx = 0.0f, float ry = 0.0f, float rz = 0.0f);
-    // 根据指定的位移和缩放绘制半圆柱体
-    void drawSemicylinder(float tx, float ty, float tz, float sx, float sy, float sz,
-        float angle = 0.0f, float rx = 0.0f, float ry = 0.0f, float rz = 0.0f);
     // 设置物体颜色 绘制前调用
     void setObjectColor(float r, float g, float b);
     // 设置观察视角 修改摄像机位置时调用
@@ -64,69 +57,80 @@ protected:
     void rotateViewDes(bool turnRight);
     // 检测用户是否按下键盘 并对摄像机进行设置
     void setCamera(int key);
-    // 初始化cubeVBO和cubeVAO 保存了绘制正方体的信息
-    void initCube();
-    // 初始化semicylinderVBO和semicylinderVAO 保存了绘制半圆柱体的信息
-    void initSemicylinder();
-    // 细分得到半圆 结果保存在semicircleVertices数组中
-    void subdivideSemicircle(int depth, std::vector<GLfloat>& v);
-    // 通过两个原有顶点位置计算得到新的中点位置
-    void getHalf(GLfloat v1[], GLfloat v2[], GLfloat v12[], GLfloat scale = 1.0f);
-    // 将三角形v1v2v3的顶点信息添加到vertices数组中
-    void addTriangle(GLfloat v1[], GLfloat v2[], GLfloat v3[], std::vector<GLfloat>& v);
-    void addVertex(GLfloat x, GLfloat y, GLfloat z, std::vector<GLfloat>& v);
 
-    /* *********************** */
+    /* 各部件绘制函数 */
 
-    /* *********************** */
-
+    // 绘制船体和收银台
+    void drawCashier();
+    // 绘制餐厅
     void drawRestaurant();
-    void initRestaurant();
-    // 绘制半圆环
-    void drawTorus(float innerRadius, float OutRadius);
     // 绘制天空盒
-    void DrawSkybox();
-    // 初始化绘制天空盒所需信息
-    void initSkybox();
-
-    /* *********************** */
-
-    /* *********************** */
-
+    void drawSkybox();
     // 绘制桌子
     void drawDesk();
     // 绘制椅子
     void drawChair();
+
+    /* 基本形状绘制函数 */
+
+    // 根据指定的位移和缩放绘制长方体
+    void drawCuboid(float tx, float ty, float tz, float sx, float sy, float sz,
+        float angle = 0.0f, float rx = 0.0f, float ry = 0.0f, float rz = 0.0f);
+    // 根据指定的位移和缩放绘制半圆柱体
+    void drawSemicylinder(float tx, float ty, float tz, float sx, float sy, float sz,
+        float angle = 0.0f, float rx = 0.0f, float ry = 0.0f, float rz = 0.0f);
+    // 根据指定的位移和缩放绘制圆柱体
+    void drawCylinder(float tx, float ty, float tz, float sx, float sy, float sz,
+        float angle, float rx, float ry, float rz);
     // 根据指定的位移绘制椭圆柱体
     void drawOval(float tx, float ty, float tz, float angle, float rx, float ry, float rz);
     // 根据指定的位移绘制圆台体
     void drawCone(float tx, float ty, float tz, float angle, float rx, float ry, float rz);
-    // 根据指定的位移和缩放绘制圆柱体
-    void drawCylinder(float tx, float ty, float tz, float sx, float sy, float sz,
-        float angle, float rx, float ry, float rz);
     // 绘制圆锥
     void drawTaper(float tx, float ty, float tz, float angle, float rx, float ry, float rz);
+    // 绘制半圆环
+    void drawTorus(float innerRadius, float OutRadius);
 
+    /* 初始化相关函数 */
+
+    // 初始化cubeVBO和cubeVAO 保存了绘制正方体的信息
+    void initCube();
+    // 初始化semicylinderVBO和semicylinderVAO 保存了绘制半圆柱体的信息
+    void initSemicylinder();
     // 初始化cylinderVBO和cylinderVAO 保存了绘制圆柱体的信息
     void initCylinder();
-    // 细分得到圆 结果保存在circleVertices数组中
-    void subdivideCircle(int depth, std::vector<GLfloat>& v, float length);
-
     // 初始化taperVBO和taperVAO 保存了绘制圆锥体的信息
     void initTaper();
     // 初始化ovalVBO和ovalVAO 保存了绘制椭圆体的信息
     void initOval();
     // 初始化coneVBO和coneVAO 保存了绘制圆台的信息
     void initCone();
+    // 初始化绘制餐厅所需信息
+    void initRestaurant();
+    // 初始化绘制天空盒所需信息
+    void initSkybox();
 
-    /* *********************** */
+    /* 辅助函数 */
+
+    // 细分得到半圆 结果保存在semicircleVertices数组中
+    void subdivideSemicircle(int depth, std::vector<GLfloat>& v);
+    // 细分得到圆 结果保存在circleVertices数组中
+    void subdivideCircle(int depth, std::vector<GLfloat>& v, float length);
+    // 通过两个原有顶点位置计算得到新的中点位置
+    void getHalf(GLfloat v1[], GLfloat v2[], GLfloat v12[], GLfloat scale = 1.0f);
+    // 将三角形v1v2v3的顶点信息添加到vertices数组中
+    void addTriangle(GLfloat v1[], GLfloat v2[], GLfloat v3[], std::vector<GLfloat>& v);
+    void addVertex(GLfloat x, GLfloat y, GLfloat z, std::vector<GLfloat>& v);
 
 private:
     QTimer* timer;
-    // 你可以将你的shader或者vbo声明为私有变量
+    
     GLuint vertexShader;
     GLuint fragmentShader;
     GLuint program;
+    
+    /* 纹理贴图相关 */
+
     // 控制是否使用漫反射纹理贴图 1为使用 0为不使用
     GLint useTexture = 0;
     // 记录所有图像路径和纹理贴图的映射关系
@@ -134,7 +138,7 @@ private:
     // 记录所有图像路径和编号(即第几个图像)的映射关系
     std::unordered_map<const char*, int> imgpath2index;
 
-    /* *********************** */
+    /* 形状顶点信息 */
 
     GLuint cubeVBO; // 保存了绘制正方体的信息 包括顶点位置和法向量
     GLuint cubeVAO; // 保存了绘制正方体的信息 用于管理顶点属性的状态
@@ -144,38 +148,12 @@ private:
     std::vector<GLfloat> semicylinderVertices;  // 保存了半圆柱体顶点信息 包括位置和法向量
     int vertexNumOfSemicylinder;    // 绘制半圆柱体所需的顶点数量
 
-    float lightPos[3] = { 50.0f, 50.0f, 50.0f };      // 光源位置
-    float viewPos[3] = { 0.0f, 100.0f, 700.0f };     // 观察位置
-    float objectColor[3] = { 1.0f, 0.5f, 0.31f };   // 物体颜色
-    float lightColor[3] = { 1.0f, 1.0f, 1.0f };     // 光源颜色
-    float viewDesPos[3] = { 0.0f, 100.0f, 700.0f - 1.0f };  // 摄像机看向的位置 初始看向z轴负方向
-    // 标识看向的方向 有 0 - 7 共八种情况
-    // 0表示看向z轴负方向 接下来每增加1向右旋转45度
-    int viewFlag = 0;
-    // xRate 和 zRate 用来判断当前向右移动时坐标变换的方向
-    // 如 xRate 为 1.0 且 zRate 为 0.0 时 向右移动即向x轴正方向移动
-    // 当 xRate 为 0.7 且 zRate 为 0.7 时 向右移动即向x轴和z轴正方向的夹角方向移动
-    float xRate = 1.0f;
-    float zRate = 0.0f;
-    // 细分三角形迭代次数
-    const float ITERATIONS = 10;
-
-    /* *********************** */
-
-    /* *********************** */
-
-    const float PI = 3.14;
     GLuint VBOOutButtomId;
     GLuint VAOOutButtomId;
     GLuint quadsVBO;
     GLuint quadsVAO;
-
     GLuint skyboxVAO;
     GLuint skyboxVBO;
-
-    /* *********************** */
-
-    /* *********************** */
 
     GLuint cylinderVBO; // 保存了绘制圆柱体的信息 包括顶点位置和法向量
     GLuint cylinderVAO; // 保存了绘制圆柱体的信息 用于管理顶点属性的状态
@@ -200,8 +178,27 @@ private:
     int vertexNumOfOval;    // 绘制椭圆柱体所需的顶点数量
     int vertexNumOfCone; // 绘制圆台所需的顶点数量
 
-    /* *********************** */
+    /* 状态信息 */
 
+    float lightPos[3] = { 50.0f, 50.0f, 50.0f };      // 光源位置
+    float viewPos[3] = { 0.0f, 100.0f, 700.0f };     // 观察位置
+    float objectColor[3] = { 1.0f, 0.5f, 0.31f };   // 物体颜色
+    float lightColor[3] = { 1.0f, 1.0f, 1.0f };     // 光源颜色
+    float viewDesPos[3] = { 0.0f, 100.0f, 700.0f - 1.0f };  // 摄像机看向的位置 初始看向z轴负方向
+    // 标识看向的方向 有 0 - 7 共八种情况
+    // 0表示看向z轴负方向 接下来每增加1向右旋转45度
+    int viewFlag = 0;
+    // xRate 和 zRate 用来判断当前向右移动时坐标变换的方向
+    // 如 xRate 为 1.0 且 zRate 为 0.0 时 向右移动即向x轴正方向移动
+    // 当 xRate 为 0.7 且 zRate 为 0.7 时 向右移动即向x轴和z轴正方向的夹角方向移动
+    float xRate = 1.0f;
+    float zRate = 0.0f;
+
+    /* 其他参数 */
+
+    const float ITERATIONS = 10;    // 细分三角形迭代次数
+    const float PI = 3.14;
+    
     // initShader函数中使用到的变量 和读取文件相关
     std::ifstream vertexShaderFile;
     std::ifstream fragmentShaderFile;

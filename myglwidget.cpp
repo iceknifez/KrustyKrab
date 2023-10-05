@@ -1,6 +1,4 @@
 #include "myglwidget.h"
-#include <QtCore/qdir.h>
-#include <qopenglextrafunctions.h>
 using namespace std;
 
 // MyGLWidget类的构造函数，实例化定时器timer
@@ -9,7 +7,7 @@ MyGLWidget::MyGLWidget(QWidget* parent)
 {
 	resize(1280, 800);
 	timer = new QTimer(this); // 实例化一个定时器
-	timer->start(16); // 时间间隔设置为16ms，可以根据需要调整
+	timer->start(50); // 时间间隔设置为50ms，可以根据需要调整
 	connect(timer, SIGNAL(timeout()), this, SLOT(update())); // 连接update()函数，每16ms触发一次update()函数进行重新绘图
 }
 
@@ -156,7 +154,7 @@ void MyGLWidget::paintGL()
 	glTranslatef(viewPos[0], viewPos[1], viewPos[2]);
 	//glScalef(1410.0f, 700.0f, 1610.0f);
 	glScalef(2500.0f, 1500.0f, 2500.0f);
-	DrawSkybox();
+	drawSkybox();
 	glPopMatrix();
 	useTexture = 0;
 
@@ -216,7 +214,7 @@ void MyGLWidget::initShader(std::string vertexPath, std::string fragmentPath)
 	glShaderSource(fragmentShader, 1, &fragmentShaderData, NULL);
 	glCompileShader(fragmentShader);
 
-	// 创建一个着色程序 并把顶点着色器和片段着色器附加到该程序上
+	// 创建一个着色程序 并把顶点着色器和片元着色器附加到该程序上
 	program = glCreateProgram();
 	glAttachShader(program, vertexShader);
 	glAttachShader(program, fragmentShader);
@@ -226,14 +224,24 @@ void MyGLWidget::initShader(std::string vertexPath, std::string fragmentPath)
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
+	// 启用着色程序
 	glUseProgram(program);
+
+	// 设置光源的环境光照、漫反射光照和镜面光照 并传递到片元着色器中
+	GLint lightAmbientLoc = glGetUniformLocation(program, "light.ambient");
+	GLint lightDiffuseLoc = glGetUniformLocation(program, "light.diffuse");
+	GLint lightSpecularLoc = glGetUniformLocation(program, "light.specular");
+
+	//glUniform3f(lightAmbientLoc, 0.2f, 0.2f, 0.2f);
+	//glUniform3f(lightDiffuseLoc, 0.5f, 0.5f, 0.5f);
+	//glUniform3f(lightSpecularLoc, 1.0f, 1.0f, 1.0f);
+	glUniform3f(lightAmbientLoc, 0.4f, 0.4f, 0.4f);
+	glUniform3f(lightDiffuseLoc, 0.5f, 0.5f, 0.5f);
+	glUniform3f(lightSpecularLoc, 0.5f, 0.5f, 0.5f);
 }
 
 void MyGLWidget::updateShader()
 {
-	// 启用着色程序
-	//glUseProgram(program);
-
 	// 获取当前的 modelview 和 projection 矩阵
 	GLfloat modelview[16];
 	GLfloat projection[16];
@@ -248,7 +256,6 @@ void MyGLWidget::updateShader()
 	glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, projection);
 
 	// 向片元着色器传递光源位置
-	//GLint lightPosLoc = glGetUniformLocation(program, "lightPos");
 	GLint lightPosLoc = glGetUniformLocation(program, "light.position");
 	glUniform3f(lightPosLoc, lightPos[0], lightPos[1], lightPos[2]);
 
@@ -273,18 +280,9 @@ void MyGLWidget::updateShader()
 	glUniform3f(matDiffuseLoc, objectColor[0], objectColor[1], objectColor[2]);
 	glUniform3f(matSpecularLoc, 0.5f, 0.5f, 0.5f);
 	glUniform1f(matShineLoc, 32.0f);
-
-	GLint lightAmbientLoc = glGetUniformLocation(program, "light.ambient");
-	GLint lightDiffuseLoc = glGetUniformLocation(program, "light.diffuse");
-	GLint lightSpecularLoc = glGetUniformLocation(program, "light.specular");
-
-	//glUniform3f(lightAmbientLoc, 0.2f, 0.2f, 0.2f);
-	//glUniform3f(lightDiffuseLoc, 0.5f, 0.5f, 0.5f);
-	//glUniform3f(lightSpecularLoc, 1.0f, 1.0f, 1.0f);
-	glUniform3f(lightAmbientLoc, 0.4f, 0.4f, 0.4f);
-	glUniform3f(lightDiffuseLoc, 0.5f, 0.5f, 0.5f);
-	glUniform3f(lightSpecularLoc, 0.5f, 0.5f, 0.5f);
 }
+
+/* 状态信息设置函数 */
 
 void MyGLWidget::setDiffuseMap(const char* imagePath)
 {
@@ -333,71 +331,6 @@ void MyGLWidget::setDiffuseMap(const char* imagePath)
 	glActiveTexture(GL_TEXTURE0 + index);  // 设置纹理单元为 GL_TEXTURE0 + index
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glUniform1i(glGetUniformLocation(program, "useTexture"), useTexture);
-}
-
-void MyGLWidget::drawCashier()
-{
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	// 船体
-	useTexture = 1;	// 使用漫反射纹理贴图
-	setDiffuseMap("img/boat1.png");
-	drawCuboid(8 + 30 - 0.5f, 0.0f, 0.0f, 1.0f, 10.0f, 16.0f);	// 后钢板
-	drawCuboid(8 + 0.5f, 0.0f, 0.0f, 1.0f, 10.0f, 16.0f);		// 前钢板
-	drawCuboid(8 + 15.0f, 0.0f, 7.5f, 28.0f, 10.0f, 1.0f);		// 左钢板
-	drawCuboid(8 + 15.0f, 0.0f, -7.5f, 28.0f, 10.0f, 1.0f);		// 右钢板
-	drawCuboid(8 + 15.0f, -4.5f, 0.0f, 28.0f, 1.0f, 14.0f);		// 底板
-	setDiffuseMap("img/boat1_rotate.png");
-	drawSemicylinder(8.0f, 0.0f, 0.0f, 8.0f, 5.0f, 8.0f);	// 船头
-	setDiffuseMap("img/boat2.png");
-	drawCuboid(0.0f, 1.0f, 0.0f, 2.0f, 12.0f, 2.0f);		// 船头柱子
-
-	setObjectColor(0.76f, 0.82f, 0.94f);	// 将颜色设置为浅蓝色 (193, 210, 240)
-	drawCuboid(8 + 30 - 1.5f, 3.5f, 0.0f, 1.0f, 1.0f, 14.0f);		// 后突起
-	drawCuboid(8 + 1.5f, 3.5f, 0.0f, 1.0f, 1.0f, 14.0f);			// 前突起
-	drawCuboid(8 + 15.0f, 3.5f, 7.5f - 1.0f, 26.0f, 1.0f, 1.0f);	// 左突起
-	drawCuboid(8 + 15.0f, 3.5f, -7.5f + 1.0f, 26.0f, 1.0f, 1.0f);	// 右突起
-
-	drawCuboid(8 + 30 - 4.5f, 1.0f, 0.0f, 8.0f, 1.0f, 14.0f);	// 尾部架子
-
-	// 收银台
-	// setObjectColor(0.1f, 0.2f, 0.2f);	// 将收银台颜色设置为偏蓝绿的深灰色
-	setDiffuseMap("img/cashier.png");
-	drawCuboid(8.0f - 2.0f, 6.0f, 0.0f, 4.0f, 2.0f, 8.0f);	// 平放结构
-	drawCuboid(8.0f - 5.0f, 7.0f, 0.0f, 2.0f, 4.0f, 8.0f);	// 直立结构
-	drawCuboid(8.0f - 5.0f, 9.5f, 0.0f, 1.0f, 1.0f, 1.0f);	// 小直立结构
-	drawCuboid(8.0f - 5.0f, 10.5f, 0.0f, 1.0f, 1.0f, 3.0f);	// 小平放结构
-	useTexture = 0; // 不使用漫反射纹理贴图
-}
-
-void MyGLWidget::drawCuboid(float tx, float ty, float tz, float sx, float sy, float sz,
-	float angle, float rx, float ry, float rz)
-{
-	glPushMatrix();
-	glTranslatef(tx, ty, tz);
-	glScalef(sx, sy, sz);
-	glRotatef(angle, rx, ry, rz);
-	updateShader();
-
-	glBindVertexArray(cubeVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
-	glBindVertexArray(0);
-	glPopMatrix();
-}
-
-void MyGLWidget::drawSemicylinder(float tx, float ty, float tz, float sx, float sy, float sz,
-	float angle, float rx, float ry, float rz)
-{
-	glPushMatrix();
-	glTranslatef(tx, ty, tz);
-	glScalef(sx, sy, sz);
-	glRotatef(angle, rx, ry, rz);
-	updateShader();
-
-	glBindVertexArray(semicylinderVAO);
-	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfSemicylinder);
-	glBindVertexArray(0);
-	glPopMatrix();
 }
 
 void MyGLWidget::setObjectColor(float r, float g, float b)
@@ -488,6 +421,339 @@ void MyGLWidget::setCamera(int key)
 	glLoadIdentity();
 	gluLookAt(viewPos[0], viewPos[1], viewPos[2], viewDesPos[0], viewDesPos[1], viewDesPos[2], 0, 1, 0);
 }
+
+/* 各部件绘制函数 */
+
+void MyGLWidget::drawCashier()
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// 船体
+	useTexture = 1;	// 使用漫反射纹理贴图
+	setDiffuseMap("img/boat1.png");
+	drawCuboid(8 + 30 - 0.5f, 0.0f, 0.0f, 1.0f, 10.0f, 16.0f);	// 后钢板
+	drawCuboid(8 + 0.5f, 0.0f, 0.0f, 1.0f, 10.0f, 16.0f);		// 前钢板
+	drawCuboid(8 + 15.0f, 0.0f, 7.5f, 28.0f, 10.0f, 1.0f);		// 左钢板
+	drawCuboid(8 + 15.0f, 0.0f, -7.5f, 28.0f, 10.0f, 1.0f);		// 右钢板
+	drawCuboid(8 + 15.0f, -4.5f, 0.0f, 28.0f, 1.0f, 14.0f);		// 底板
+	setDiffuseMap("img/boat1_rotate.png");
+	drawSemicylinder(8.0f, 0.0f, 0.0f, 8.0f, 5.0f, 8.0f);	// 船头
+	setDiffuseMap("img/boat2.png");
+	drawCuboid(0.0f, 1.0f, 0.0f, 2.0f, 12.0f, 2.0f);		// 船头柱子
+
+	setObjectColor(0.76f, 0.82f, 0.94f);	// 将颜色设置为浅蓝色 (193, 210, 240)
+	drawCuboid(8 + 30 - 1.5f, 3.5f, 0.0f, 1.0f, 1.0f, 14.0f);		// 后突起
+	drawCuboid(8 + 1.5f, 3.5f, 0.0f, 1.0f, 1.0f, 14.0f);			// 前突起
+	drawCuboid(8 + 15.0f, 3.5f, 7.5f - 1.0f, 26.0f, 1.0f, 1.0f);	// 左突起
+	drawCuboid(8 + 15.0f, 3.5f, -7.5f + 1.0f, 26.0f, 1.0f, 1.0f);	// 右突起
+
+	drawCuboid(8 + 30 - 4.5f, 1.0f, 0.0f, 8.0f, 1.0f, 14.0f);	// 尾部架子
+
+	// 收银台
+	// setObjectColor(0.1f, 0.2f, 0.2f);	// 将收银台颜色设置为偏蓝绿的深灰色
+	setDiffuseMap("img/cashier.png");
+	drawCuboid(8.0f - 2.0f, 6.0f, 0.0f, 4.0f, 2.0f, 8.0f);	// 平放结构
+	drawCuboid(8.0f - 5.0f, 7.0f, 0.0f, 2.0f, 4.0f, 8.0f);	// 直立结构
+	drawCuboid(8.0f - 5.0f, 9.5f, 0.0f, 1.0f, 1.0f, 1.0f);	// 小直立结构
+	drawCuboid(8.0f - 5.0f, 10.5f, 0.0f, 1.0f, 1.0f, 3.0f);	// 小平放结构
+	useTexture = 0; // 不使用漫反射纹理贴图
+}
+
+void MyGLWidget::drawRestaurant() {
+
+	// 绘制底部、门板和屋顶下部
+	useTexture = 1;	// 使用漫反射纹理贴图
+	//setDiffuseMap("img/wood7.jpg");	// 指定图片
+	setDiffuseMap("img/wood3.png");	// 指定图片
+	//setDiffuseMap("img/test.png");	// 指定图片
+	glPushMatrix();
+	glBindVertexArray(quadsVAO);
+	updateShader();	// 每次进行绘制之前要调用该方法
+	glDrawArrays(GL_QUADS, 0, 4 * (22 + 18 + 24));
+	glBindVertexArray(0);
+	glPopMatrix();
+
+	// 绘制屋顶
+	drawSemicylinder(0.0f, 70.0f, -5.0f, 34.0f, 20.0f, 19.0f, -90.0f, 0.0f, 0.0f, 1.0f);
+
+	// 绘制柱子（半径为4，高为60的圆柱体） 注意后面的柱子先绘制
+	drawCylinder(34.0f, 40.0f, -24.0f, 4.0f, 60.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);	// 柱子2
+	drawCylinder(-34.0f, 40.0f, -24.0f, 4.0f, 60.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);	// 柱子3
+	// 绘制两旁的柱子
+	drawCylinder(34.0f, 40.0f, 14.0f, 4.0f, 60.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);	// 柱子1
+	drawCylinder(-34.0f, 40.0f, 14.0f, 4.0f, 60.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);	// 柱子4
+
+	// 绘制圆环
+	glPushMatrix();
+	glTranslatef(34.0, 70.0f, -5.0f);
+	glRotatef(90, 0, 1.0, 0.0);
+	drawTorus(15, 23);
+	glPopMatrix();
+
+	// 绘制圆环
+	glPushMatrix();
+	glTranslatef(-34.0, 70.0f, -5.0f);
+	glRotatef(90, 0, 1.0, 0.0);
+	drawTorus(15, 23);
+	glPopMatrix();
+
+	useTexture = 0;
+
+}
+
+void MyGLWidget::drawDesk()
+{
+	// 桌面
+	useTexture = 1;
+	setDiffuseMap("img/desk1.png");
+	drawCylinder(0.0f, 21.0f, 0.0f, 16.0f, 3.0f, 16.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	// 支柱
+	setDiffuseMap("img/desk2.png");
+	drawCylinder(0.0f, 11.0f, 0.0f, 2.0f, 20.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	// 地盘
+	drawCylinder(0.0f, 0.0f, 0.0f, 5.0f, 2.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	// 六个装饰
+	useTexture = 0;
+	setObjectColor(192 / 255.0f, 0.0f, 0.0f);
+	drawTaper(-19.0f, 21.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	drawTaper(-9.5f, 21.0f, 16.45f, 60.0f, 0.0f, 1.0f, 0.0f);
+	drawTaper(9.5f, 21.0f, 16.45f, 120.0f, 0.0f, 1.0f, 0.0f);
+	drawTaper(19.0f, 21.0f, 0.0f, 180.0f, 0.0f, 1.0f, 0.0f);
+	//drawTaper(9.5f, 0.0f, -16.45f, 60.0f, 0.0f, -1.0f, 0.0f);
+	//drawTaper(-9.5f, 0.0f, -16.45f, 120.0f, 0.0f, -1.0f, 0.0f);
+	drawTaper(9.5f, 21.0f, -16.45f, 240.0f, 0.0f, 1.0f, 0.0f);
+	drawTaper(-9.5f, 21.0f, -16.45f, 300.0f, 0.0f, 1.0f, 0.0f);
+}
+
+void MyGLWidget::drawChair()
+{
+
+	// 绘制桶上沿
+	useTexture = 1;
+	setDiffuseMap("img/chair1_2.png");
+	glPushMatrix();
+	glTranslatef(0.0f, 12.0f, 0.0f);
+	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+	updateShader();
+	drawTorus(2.5, 3);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(0.0f, 12.0f, 0.0f);
+	glRotatef(90.0f, -1.0f, 0.0f, 0.0f);
+	updateShader();
+	drawTorus(2.5, 3);
+	glPopMatrix();
+
+	//绘制水桶
+	drawOval(0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	drawCone(0.0f, 7.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	drawCylinder(0.0f, 6.0f, 0.0f, 4.0f, 2.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	glPushMatrix();
+	glRotatef(177.0f, 0.0f, 1.0f, 0.0f);
+	drawCone(0.0f, 5.0f, 0.0f, 180.0f, 1.0f, 0.0f, 0.0f);
+	drawOval(0.0f, 2.0f, 0.0f, 180.0f, 1.0f, 0.0f, 0.0f);
+	glPopMatrix();
+
+
+	// 绘制桶的铁环
+	setDiffuseMap("img/chair2.png");
+	glPushMatrix();
+	glTranslatef(0.0f, 10.0f, 0.0f);
+	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+	updateShader();
+	drawTorus(3.1, 3.7);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(0.0f, 10.0f, 0.0f);
+	glRotatef(90.0f, -1.0f, 0.0f, 0.0f);
+	updateShader();
+	drawTorus(3.1, 3.7);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(0.0f, 2.0f, 0.0f);
+	glRotatef(90.0f, -1.0f, 0.0f, 0.0f);
+	updateShader();
+	drawTorus(3.1, 3.7);
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(0.0f, 2.0f, 0.0f);
+	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
+	updateShader();
+	drawTorus(3.1, 3.7);
+	glPopMatrix();
+
+}
+
+void MyGLWidget::drawSkybox()
+{
+	glBindVertexArray(skyboxVAO);
+	updateShader();
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+}
+
+/* 基本形状绘制函数 */
+
+void MyGLWidget::drawCuboid(float tx, float ty, float tz, float sx, float sy, float sz,
+	float angle, float rx, float ry, float rz)
+{
+	glPushMatrix();
+	glTranslatef(tx, ty, tz);
+	glScalef(sx, sy, sz);
+	glRotatef(angle, rx, ry, rz);
+	updateShader();
+
+	glBindVertexArray(cubeVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 12 * 3);
+	glBindVertexArray(0);
+	glPopMatrix();
+}
+
+void MyGLWidget::drawSemicylinder(float tx, float ty, float tz, float sx, float sy, float sz,
+	float angle, float rx, float ry, float rz)
+{
+	glPushMatrix();
+	glTranslatef(tx, ty, tz);
+	glScalef(sx, sy, sz);
+	glRotatef(angle, rx, ry, rz);
+	updateShader();
+
+	glBindVertexArray(semicylinderVAO);
+	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfSemicylinder);
+	glBindVertexArray(0);
+	glPopMatrix();
+}
+
+void MyGLWidget::drawCylinder(float tx, float ty, float tz, float sx, float sy, float sz,
+	float angle, float rx, float ry, float rz)
+{
+	glPushMatrix();
+	glTranslatef(tx, ty, tz);
+	glScalef(sx, sy, sz);
+	glRotatef(angle, rx, ry, rz);
+	updateShader();
+
+	glBindVertexArray(cylinderVAO);
+	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfCylinder);
+	glBindVertexArray(0);
+	glPopMatrix();
+}
+
+void MyGLWidget::drawOval(float tx, float ty, float tz, float angle, float rx, float ry, float rz)
+{
+	glPushMatrix();
+	glTranslatef(tx, ty, tz);
+	glRotatef(angle, rx, ry, rz);
+	updateShader();
+
+	glBindVertexArray(ovalVAO);
+	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfOval);
+	glBindVertexArray(0);
+	glPopMatrix();
+}
+
+void MyGLWidget::drawCone(float tx, float ty, float tz, float angle, float rx, float ry, float rz)
+{
+	glPushMatrix();
+	glTranslatef(tx, ty, tz);
+	glRotatef(angle, rx, ry, rz);
+	updateShader();
+
+	glBindVertexArray(coneVAO);
+	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfCone);
+	glBindVertexArray(0);
+	glPopMatrix();
+}
+
+void MyGLWidget::drawTaper(float tx, float ty, float tz, float angle, float rx, float ry, float rz)
+{
+	glPushMatrix();
+	glTranslatef(tx, ty, tz);
+	glRotatef(angle, rx, ry, rz);
+	updateShader();
+
+	glBindVertexArray(taperVAO);
+	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfTaper);
+	glBindVertexArray(taperVAO);
+	glPopMatrix();
+}
+
+// 绘制三维立体半圆环 innerRadius:内环半径，OutEadius：外环半径，Sides和Rings都是切割数
+void MyGLWidget::drawTorus(float innerRadius, float OutRadius) {
+	const int Sides = 100;
+	const int Rings = 100;
+	float verties[8 * (Sides + 1) * (Rings + 1) * 2];
+	float alphaStep = (float)(PI / Sides); // 只画半圆环,不用乘2
+	float BetaStep = (float)(2 * PI / Sides);
+	float beta = 0;
+	float alpha = 0;
+	float x0, x1, y0, y1, z0, z1, x2, y2, z2;
+	float nor[3];
+	float r = (OutRadius - innerRadius) / 2; // 圆环的半径
+	int index = 0;
+	for (int i = 0; i <= Sides; i++) {
+		alpha = i * alphaStep;
+		for (int j = 0; j <= Rings; j++) {
+			beta = j * BetaStep;
+			x0 = (float)(cos(alpha) * (r + innerRadius + r * cos(beta)));
+			y0 = (float)(sin(alpha) * (r + innerRadius + r * cos(beta)));
+			z0 = (float)(r * sin(beta));
+			x1 = (float)(cos(alpha + alphaStep) * (r + innerRadius + r * cos(beta)));
+			y1 = (float)(sin(alpha + alphaStep) * (r + innerRadius + r * cos(beta)));
+			z1 = (float)(r * sin(beta));
+			nor[0] = (float)(cos(alpha) * cos(beta));
+			nor[1] = (float)(sin(alpha) * cos(beta));
+			nor[2] = (float)(sin(beta));
+			verties[index++] = x0;
+			verties[index++] = y0;
+			verties[index++] = z0;
+			verties[index++] = nor[0];
+			verties[index++] = nor[1];
+			verties[index++] = nor[2];
+			verties[index++] = ((float)2 * i / Rings);
+			verties[index++] = (float)j / Rings;
+
+			nor[0] = (float)(cos(alpha + alphaStep) * cos(beta));
+			nor[1] = (float)(sin(alpha + alphaStep) * cos(beta));
+			nor[2] = (float)(sin(beta));
+			verties[index++] = x1;
+			verties[index++] = y1;
+			verties[index++] = z1;
+			verties[index++] = nor[0];
+			verties[index++] = nor[1];
+			verties[index++] = nor[2];
+			verties[index++] = ((float)2 * i / Rings);
+			verties[index++] = (float)j / Rings;
+		}
+	}
+	// 生成VAO和VBO并绑定
+	glGenVertexArrays(1, &VAOOutButtomId);
+	glBindVertexArray(VAOOutButtomId);
+	glGenBuffers(1, &VBOOutButtomId);
+	glBindBuffer(GL_ARRAY_BUFFER, VBOOutButtomId);
+	// 把之前定义的顶点数据复制到缓冲的内存中
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verties), verties, GL_STATIC_DRAW);
+	// 设置顶点属性指针
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(2);
+	// 解绑VAO
+	glBindVertexArray(0);
+
+	glBindVertexArray(VAOOutButtomId);
+	updateShader();
+	glDrawArrays(GL_QUAD_STRIP, 0, 2 * (Sides + 1) * (Rings + 1));
+	glBindVertexArray(0);
+}
+
+/* 初始化相关函数 */
 
 void MyGLWidget::initCube()
 {
@@ -717,367 +983,6 @@ void MyGLWidget::initSemicylinder()
 	glBindVertexArray(0);
 }
 
-void MyGLWidget::subdivideSemicircle(int depth, std::vector<GLfloat>& vertices)
-{
-	// 当深度小于等于0时 停止迭代
-	if (depth <= 0)
-	{
-		return;
-	}
-
-	// 创建一个临时数组temp 保存原来的顶点信息
-	std::vector<GLfloat> temp(vertices);
-	vertices.clear();
-
-	// 每个三角形有三个顶点 每个顶点有xyz三个分量
-	int numOfTriangles = temp.size() / 3 / 3;
-
-	// 对每个三角形 利用除原点外的两个顶点计算新的中点
-	// 并利用该中点将原三角形分成两个新三角形
-	for (int i = 0; i < numOfTriangles; i++)
-	{
-		// v1 v2 和 v3 分别为三角形的三个顶点 其中v1为原点
-		GLfloat v1[3], v2[3], v3[3];
-		for (int j = 0; j < 3; j++)
-		{
-			v1[j] = temp[i * 9 + j];
-			v2[j] = temp[i * 9 + j + 3];
-			v3[j] = temp[i * 9 + j + 6];
-		}
-
-		// 得到原点对边中点
-		GLfloat v23[3];
-		getHalf(v2, v3, v23);
-
-		// 将顶点信息添加到vertices数组中
-		addTriangle(v1, v2, v23, vertices);
-		addTriangle(v1, v23, v3, vertices);
-	}
-	// 深度减1 进行下一轮迭代
-	subdivideSemicircle(depth - 1, vertices);
-}
-
-void MyGLWidget::getHalf(GLfloat v1[], GLfloat v2[], GLfloat v12[], GLfloat scale)
-{
-	// 该函数通过v1和v2得到中点v12
-	// v12到原点的距离为1
-	for (int i = 0; i < 3; i++)
-	{
-		v12[i] = v1[i] + v2[i];
-	}
-	double length = sqrt(v12[0] * v12[0] + v12[1] * v12[1] + v12[2] * v12[2]);
-	for (int i = 0; i < 3; i++)
-	{
-		v12[i] = v12[i] / length * scale;
-	}
-}
-
-void MyGLWidget::addTriangle(GLfloat v1[], GLfloat v2[], GLfloat v3[], std::vector<GLfloat>& v)
-{
-	// v1 v2 v3分别代表三角形的三个顶点
-	// 每个顶点有xyz三个分量 将这些信息添加到vertices数组中
-	v.push_back(v1[0]);
-	v.push_back(v1[1]);
-	v.push_back(v1[2]);
-
-	v.push_back(v2[0]);
-	v.push_back(v2[1]);
-	v.push_back(v2[2]);
-
-	v.push_back(v3[0]);
-	v.push_back(v3[1]);
-	v.push_back(v3[2]);
-}
-
-void MyGLWidget::addVertex(GLfloat x, GLfloat y, GLfloat z, std::vector<GLfloat>& v)
-{
-	v.push_back(x);
-	v.push_back(y);
-	v.push_back(z);
-}
-
-void MyGLWidget::initRestaurant() {
-
-	GLfloat vertices_quads[(22 + 18 + 24) * 4 * 8];
-	
-	memcpy(vertices_quads, restaurant_bottom, 22 * 4 * 8 * sizeof(float));						// 餐厅底部
-	memcpy(vertices_quads + 22 * 4 * 8, restaurant_side, 18 * 4 * 8 * sizeof(float));			// 餐厅侧面和门板
-	memcpy(vertices_quads + (22 + 18) * 4 * 8, restaurant_side2, 24 * 4 * 8 * sizeof(float));	// 餐厅侧面屋顶下的上半部分
-
-	// 外部底层VBO初始化
-	// 生成VBO对象绑定
-	glGenBuffers(1, &quadsVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, quadsVBO);
-	// 生成VAO对象绑定
-	glGenVertexArrays(1, &quadsVAO);
-	glBindVertexArray(quadsVAO);
-	// 把之前定义的顶点数据复制到缓冲的内存中
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_quads), &vertices_quads, GL_STATIC_DRAW);
-	// 设置顶点属性指针
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(2);
-	// 解绑VAO
-	glBindVertexArray(0);
-}
-
-void MyGLWidget::drawRestaurant() {
-
-	// 绘制底部、门板和屋顶下部
-	useTexture = 1;	// 使用漫反射纹理贴图
-	//setDiffuseMap("img/wood7.jpg");	// 指定图片
-	setDiffuseMap("img/wood3.png");	// 指定图片
-	//setDiffuseMap("img/test.png");	// 指定图片
-	glPushMatrix();
-	glBindVertexArray(quadsVAO);
-	updateShader();	// 每次进行绘制之前要调用该方法
-	glDrawArrays(GL_QUADS, 0, 4 * (22 + 18 + 24));
-	glBindVertexArray(0);
-	glPopMatrix();
-
-	// 绘制屋顶
-	drawSemicylinder(0.0f, 70.0f, -5.0f, 34.0f, 20.0f, 19.0f, -90.0f, 0.0f, 0.0f, 1.0f);
-
-	// 绘制柱子（半径为4，高为60的圆柱体） 注意后面的柱子先绘制
-	drawCylinder(34.0f, 40.0f, -24.0f, 4.0f, 60.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);	// 柱子2
-	drawCylinder(-34.0f, 40.0f, -24.0f, 4.0f, 60.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);	// 柱子3
-	// 绘制两旁的柱子
-	drawCylinder(34.0f, 40.0f, 14.0f, 4.0f, 60.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);	// 柱子1
-	drawCylinder(-34.0f, 40.0f, 14.0f, 4.0f, 60.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);	// 柱子4
-
-	// 绘制圆环
-	glPushMatrix();
-	glTranslatef(34.0, 70.0f, -5.0f);
-	glRotatef(90, 0, 1.0, 0.0);
-	drawTorus(15, 23);
-	glPopMatrix();
-
-	// 绘制圆环
-	glPushMatrix();
-	glTranslatef(-34.0, 70.0f, -5.0f);
-	glRotatef(90, 0, 1.0, 0.0);
-	drawTorus(15, 23);
-	glPopMatrix();
-
-	useTexture = 0;
-
-}
-
-// 绘制三维立体半圆环 innerRadius:内环半径，OutEadius：外环半径，Sides和Rings都是切割数
-void MyGLWidget::drawTorus(float innerRadius, float OutRadius) {
-	const int Sides = 100;
-	const int Rings = 100;
-	float verties[8 * (Sides + 1) * (Rings + 1) * 2];
-	float alphaStep = (float)(PI / Sides); // 只画半圆环,不用乘2
-	float BetaStep = (float)(2 * PI / Sides);
-	float beta = 0;
-	float alpha = 0;
-	float x0, x1, y0, y1, z0, z1, x2, y2, z2;
-	float nor[3];
-	float r = (OutRadius - innerRadius) / 2; // 圆环的半径
-	int index = 0;
-	for (int i = 0; i <= Sides; i++) {
-		alpha = i * alphaStep;
-		for (int j = 0; j <= Rings; j++) {
-			beta = j * BetaStep;
-			x0 = (float)(cos(alpha) * (r + innerRadius + r * cos(beta)));
-			y0 = (float)(sin(alpha) * (r + innerRadius + r * cos(beta)));
-			z0 = (float)(r * sin(beta));
-			x1 = (float)(cos(alpha + alphaStep) * (r + innerRadius + r * cos(beta)));
-			y1 = (float)(sin(alpha + alphaStep) * (r + innerRadius + r * cos(beta)));
-			z1 = (float)(r * sin(beta));
-			nor[0] = (float)(cos(alpha) * cos(beta));
-			nor[1] = (float)(sin(alpha) * cos(beta));
-			nor[2] = (float)(sin(beta));
-			verties[index++] = x0;
-			verties[index++] = y0;
-			verties[index++] = z0;
-			verties[index++] = nor[0];
-			verties[index++] = nor[1];
-			verties[index++] = nor[2];
-			verties[index++] = ((float)2 * i / Rings);
-			verties[index++] = (float)j / Rings;
-
-			nor[0] = (float)(cos(alpha + alphaStep) * cos(beta));
-			nor[1] = (float)(sin(alpha + alphaStep) * cos(beta));
-			nor[2] = (float)(sin(beta));
-			verties[index++] = x1;
-			verties[index++] = y1;
-			verties[index++] = z1;
-			verties[index++] = nor[0];
-			verties[index++] = nor[1];
-			verties[index++] = nor[2];
-			verties[index++] = ((float)2 * i / Rings);
-			verties[index++] = (float)j / Rings;
-		}
-	}
-	// 生成VAO和VBO并绑定
-	glGenVertexArrays(1, &VAOOutButtomId);
-	glBindVertexArray(VAOOutButtomId);
-	glGenBuffers(1, &VBOOutButtomId);
-	glBindBuffer(GL_ARRAY_BUFFER, VBOOutButtomId);
-	// 把之前定义的顶点数据复制到缓冲的内存中
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verties), verties, GL_STATIC_DRAW);
-	// 设置顶点属性指针
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(2);
-	// 解绑VAO
-	glBindVertexArray(0);
-
-	glBindVertexArray(VAOOutButtomId);
-	updateShader();
-	glDrawArrays(GL_QUAD_STRIP, 0, 2 * (Sides + 1) * (Rings + 1));
-	glBindVertexArray(0);
-}
-
-void MyGLWidget::drawDesk()
-{
-	// 桌面
-	useTexture = 1;
-	setDiffuseMap("img/desk1.png");
-	drawCylinder(0.0f, 21.0f, 0.0f, 16.0f, 3.0f, 16.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	// 支柱
-	setDiffuseMap("img/desk2.png");
-	drawCylinder(0.0f, 11.0f, 0.0f, 2.0f, 20.0f, 2.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	// 地盘
-	drawCylinder(0.0f, 0.0f, 0.0f, 5.0f, 2.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	// 六个装饰
-	useTexture = 0;
-	setObjectColor(192 / 255.0f, 0.0f, 0.0f);
-	drawTaper(-19.0f, 21.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	drawTaper(-9.5f, 21.0f, 16.45f, 60.0f, 0.0f, 1.0f, 0.0f);
-	drawTaper(9.5f, 21.0f, 16.45f, 120.0f, 0.0f, 1.0f, 0.0f);
-	drawTaper(19.0f, 21.0f, 0.0f, 180.0f, 0.0f, 1.0f, 0.0f);
-	//drawTaper(9.5f, 0.0f, -16.45f, 60.0f, 0.0f, -1.0f, 0.0f);
-	//drawTaper(-9.5f, 0.0f, -16.45f, 120.0f, 0.0f, -1.0f, 0.0f);
-	drawTaper(9.5f, 21.0f, -16.45f, 240.0f, 0.0f, 1.0f, 0.0f);
-	drawTaper(-9.5f, 21.0f, -16.45f, 300.0f, 0.0f, 1.0f, 0.0f);
-}
-
-void MyGLWidget::drawChair()
-{
-
-	// 绘制桶上沿
-	useTexture = 1;
-	setDiffuseMap("img/chair1_2.png");
-	glPushMatrix();
-	glTranslatef(0.0f, 12.0f, 0.0f);
-	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-	updateShader();
-	drawTorus(2.5, 3);
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(0.0f, 12.0f, 0.0f);
-	glRotatef(90.0f, -1.0f, 0.0f, 0.0f);
-	updateShader();
-	drawTorus(2.5, 3);
-	glPopMatrix();
-
-	//绘制水桶
-	drawOval(0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	drawCone(0.0f, 7.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	drawCylinder(0.0f, 6.0f, 0.0f, 4.0f, 2.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	glPushMatrix();
-	glRotatef(177.0f, 0.0f, 1.0f, 0.0f);
-	drawCone(0.0f, 5.0f, 0.0f, 180.0f, 1.0f, 0.0f, 0.0f);
-	drawOval(0.0f, 2.0f, 0.0f, 180.0f, 1.0f, 0.0f, 0.0f);
-	glPopMatrix();
-
-
-	// 绘制桶的铁环
-	setDiffuseMap("img/chair2.png");
-	glPushMatrix();
-	glTranslatef(0.0f, 10.0f, 0.0f);
-	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-	updateShader();
-	drawTorus(3.1, 3.7);
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(0.0f, 10.0f, 0.0f);
-	glRotatef(90.0f, -1.0f, 0.0f, 0.0f);
-	updateShader();
-	drawTorus(3.1, 3.7);
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(0.0f, 2.0f, 0.0f);
-	glRotatef(90.0f, -1.0f, 0.0f, 0.0f);
-	updateShader();
-	drawTorus(3.1, 3.7);
-	glPopMatrix();
-
-	glPushMatrix();
-	glTranslatef(0.0f, 2.0f, 0.0f);
-	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
-	updateShader();
-	drawTorus(3.1, 3.7);
-	glPopMatrix();
-
-}
-
-void MyGLWidget::drawOval(float tx, float ty, float tz, float angle, float rx, float ry, float rz)
-{
-	glPushMatrix();
-	glTranslatef(tx, ty, tz);
-	glRotatef(angle, rx, ry, rz);
-	updateShader();
-
-	glBindVertexArray(ovalVAO);
-	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfOval);
-	glBindVertexArray(0);
-	glPopMatrix();
-}
-
-void MyGLWidget::drawCone(float tx, float ty, float tz, float angle, float rx, float ry, float rz)
-{
-	glPushMatrix();
-	glTranslatef(tx, ty, tz);
-	glRotatef(angle, rx, ry, rz);
-	updateShader();
-
-	glBindVertexArray(coneVAO);
-	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfCone);
-	glBindVertexArray(0);
-	glPopMatrix();
-}
-
-void MyGLWidget::drawCylinder(float tx, float ty, float tz, float sx, float sy, float sz,
-	float angle, float rx, float ry, float rz)
-{
-	glPushMatrix();
-	glTranslatef(tx, ty, tz);
-	glScalef(sx, sy, sz);
-	glRotatef(angle, rx, ry, rz);
-	updateShader();
-
-	glBindVertexArray(cylinderVAO);
-	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfCylinder);
-	glBindVertexArray(0);
-	glPopMatrix();
-}
-
-void MyGLWidget::drawTaper(float tx, float ty, float tz, float angle, float rx, float ry, float rz)
-{
-	glPushMatrix();
-	glTranslatef(tx, ty, tz);
-	glRotatef(angle, rx, ry, rz);
-	updateShader();
-
-	glBindVertexArray(taperVAO);
-	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfTaper);
-	glBindVertexArray(taperVAO);
-	glPopMatrix();
-}
-
 void MyGLWidget::initCylinder()
 {
 	// 四个三角形，作为圆迭代的开始
@@ -1253,46 +1158,6 @@ void MyGLWidget::initCylinder()
 	// 解绑定
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-}
-
-void MyGLWidget::subdivideCircle(int depth, vector<GLfloat>& vertices, float length)
-{
-	// 当深度小于等于0时 停止迭代
-	if (depth <= 0)
-	{
-		return;
-	}
-
-	// 创建一个临时数组temp 保存原来的顶点信息
-	vector<GLfloat> temp(vertices);
-	vertices.clear();
-
-	// 每个三角形有三个顶点 每个顶点有xyz三个分量
-	int numOfTriangles = temp.size() / 3 / 3;
-
-	// 对每个三角形 利用除原点外的两个顶点计算新的中点
-	// 并利用该中点将原三角形分成两个新三角形
-	for (int i = 0; i < numOfTriangles; i++)
-	{
-		// v1 v2 和 v3 分别为三角形的三个顶点 其中v1为原点
-		GLfloat v1[3], v2[3], v3[3];
-		for (int j = 0; j < 3; j++)
-		{
-			v1[j] = temp[i * 9 + j];
-			v2[j] = temp[i * 9 + j + 3];
-			v3[j] = temp[i * 9 + j + 6];
-		}
-
-		// 得到原点对边中点
-		GLfloat v23[3];
-		getHalf(v2, v3, v23, length);
-
-		// 将顶点信息添加到vertices数组中
-		addTriangle(v1, v2, v23, vertices);
-		addTriangle(v1, v23, v3, vertices);
-	}
-	// 深度减1 进行下一轮迭代
-	subdivideCircle(depth - 1, vertices, length);
 }
 
 void MyGLWidget::initTaper()
@@ -1790,11 +1655,31 @@ void MyGLWidget::initCone()
 	glBindVertexArray(0);
 }
 
-void MyGLWidget::DrawSkybox()
-{
-	glBindVertexArray(skyboxVAO);
-	updateShader();
-	glDrawArrays(GL_TRIANGLES, 0, 36);
+void MyGLWidget::initRestaurant() {
+
+	GLfloat vertices_quads[(22 + 18 + 24) * 4 * 8];
+
+	memcpy(vertices_quads, restaurant_bottom, 22 * 4 * 8 * sizeof(float));						// 餐厅底部
+	memcpy(vertices_quads + 22 * 4 * 8, restaurant_side, 18 * 4 * 8 * sizeof(float));			// 餐厅侧面和门板
+	memcpy(vertices_quads + (22 + 18) * 4 * 8, restaurant_side2, 24 * 4 * 8 * sizeof(float));	// 餐厅侧面屋顶下的上半部分
+
+	// 外部底层VBO初始化
+	// 生成VBO对象绑定
+	glGenBuffers(1, &quadsVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadsVBO);
+	// 生成VAO对象绑定
+	glGenVertexArrays(1, &quadsVAO);
+	glBindVertexArray(quadsVAO);
+	// 把之前定义的顶点数据复制到缓冲的内存中
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices_quads), &vertices_quads, GL_STATIC_DRAW);
+	// 设置顶点属性指针
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(2);
+	// 解绑VAO
 	glBindVertexArray(0);
 }
 
@@ -1814,4 +1699,125 @@ void MyGLWidget::initSkybox()
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(2);
 	glBindVertexArray(0);
+}
+
+/* 辅助函数 */
+
+void MyGLWidget::subdivideSemicircle(int depth, std::vector<GLfloat>& vertices)
+{
+	// 当深度小于等于0时 停止迭代
+	if (depth <= 0)
+	{
+		return;
+	}
+
+	// 创建一个临时数组temp 保存原来的顶点信息
+	std::vector<GLfloat> temp(vertices);
+	vertices.clear();
+
+	// 每个三角形有三个顶点 每个顶点有xyz三个分量
+	int numOfTriangles = temp.size() / 3 / 3;
+
+	// 对每个三角形 利用除原点外的两个顶点计算新的中点
+	// 并利用该中点将原三角形分成两个新三角形
+	for (int i = 0; i < numOfTriangles; i++)
+	{
+		// v1 v2 和 v3 分别为三角形的三个顶点 其中v1为原点
+		GLfloat v1[3], v2[3], v3[3];
+		for (int j = 0; j < 3; j++)
+		{
+			v1[j] = temp[i * 9 + j];
+			v2[j] = temp[i * 9 + j + 3];
+			v3[j] = temp[i * 9 + j + 6];
+		}
+
+		// 得到原点对边中点
+		GLfloat v23[3];
+		getHalf(v2, v3, v23);
+
+		// 将顶点信息添加到vertices数组中
+		addTriangle(v1, v2, v23, vertices);
+		addTriangle(v1, v23, v3, vertices);
+	}
+	// 深度减1 进行下一轮迭代
+	subdivideSemicircle(depth - 1, vertices);
+}
+
+void MyGLWidget::subdivideCircle(int depth, vector<GLfloat>& vertices, float length)
+{
+	// 当深度小于等于0时 停止迭代
+	if (depth <= 0)
+	{
+		return;
+	}
+
+	// 创建一个临时数组temp 保存原来的顶点信息
+	vector<GLfloat> temp(vertices);
+	vertices.clear();
+
+	// 每个三角形有三个顶点 每个顶点有xyz三个分量
+	int numOfTriangles = temp.size() / 3 / 3;
+
+	// 对每个三角形 利用除原点外的两个顶点计算新的中点
+	// 并利用该中点将原三角形分成两个新三角形
+	for (int i = 0; i < numOfTriangles; i++)
+	{
+		// v1 v2 和 v3 分别为三角形的三个顶点 其中v1为原点
+		GLfloat v1[3], v2[3], v3[3];
+		for (int j = 0; j < 3; j++)
+		{
+			v1[j] = temp[i * 9 + j];
+			v2[j] = temp[i * 9 + j + 3];
+			v3[j] = temp[i * 9 + j + 6];
+		}
+
+		// 得到原点对边中点
+		GLfloat v23[3];
+		getHalf(v2, v3, v23, length);
+
+		// 将顶点信息添加到vertices数组中
+		addTriangle(v1, v2, v23, vertices);
+		addTriangle(v1, v23, v3, vertices);
+	}
+	// 深度减1 进行下一轮迭代
+	subdivideCircle(depth - 1, vertices, length);
+}
+
+void MyGLWidget::getHalf(GLfloat v1[], GLfloat v2[], GLfloat v12[], GLfloat scale)
+{
+	// 该函数通过v1和v2得到中点v12
+	// v12到原点的距离为1
+	for (int i = 0; i < 3; i++)
+	{
+		v12[i] = v1[i] + v2[i];
+	}
+	double length = sqrt(v12[0] * v12[0] + v12[1] * v12[1] + v12[2] * v12[2]);
+	for (int i = 0; i < 3; i++)
+	{
+		v12[i] = v12[i] / length * scale;
+	}
+}
+
+void MyGLWidget::addTriangle(GLfloat v1[], GLfloat v2[], GLfloat v3[], std::vector<GLfloat>& v)
+{
+	// v1 v2 v3分别代表三角形的三个顶点
+	// 每个顶点有xyz三个分量 将这些信息添加到vertices数组中
+	v.push_back(v1[0]);
+	v.push_back(v1[1]);
+	v.push_back(v1[2]);
+
+	v.push_back(v2[0]);
+	v.push_back(v2[1]);
+	v.push_back(v2[2]);
+
+	v.push_back(v3[0]);
+	v.push_back(v3[1]);
+	v.push_back(v3[2]);
+}
+
+void MyGLWidget::addVertex(GLfloat x, GLfloat y, GLfloat z, std::vector<GLfloat>& v)
+{
+	v.push_back(x);
+	v.push_back(y);
+	v.push_back(z);
 }
