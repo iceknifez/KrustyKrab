@@ -97,10 +97,9 @@ protected:
     void initCylinder();
     // 初始化taperVBO和taperVAO 保存了绘制圆锥体的信息
     void initTaper();
-    // 初始化ovalVBO和ovalVAO 保存了绘制椭圆体的信息
-    void initOval();
-    // 初始化coneVBO和coneVAO 保存了绘制圆台的信息
-    void initCone();
+    // 初始化givenVAO和givenVBO 保存了绘制上圆半径upperRadius下圆半径lowerRadius的圆台的信息
+    void initCone(GLuint &givenVAO, GLuint &givenVBO, int &vertexNum,
+        float upperRadius = 1.0f, float lowerRadius = 1.0f, float height = 1.0f);
     // 初始化绘制餐厅所需信息
     void initRestaurant();
     // 初始化绘制天空盒所需信息
@@ -129,8 +128,8 @@ private:
     GLuint semicylinderVBO; // 保存了绘制半圆柱体的信息 包括顶点位置和法向量
     GLuint semicylinderVAO; // 保存了绘制半圆柱体的信息 用于管理顶点属性的状态
 
-    GLuint VBOOutButtomId;
-    GLuint VAOOutButtomId;
+    GLuint outButtomVBO;
+    GLuint outButtomVAO;
     GLuint quadsVBO;
     GLuint quadsVAO;
     GLuint skyboxVAO;

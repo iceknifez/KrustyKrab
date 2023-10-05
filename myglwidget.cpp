@@ -48,8 +48,8 @@ void MyGLWidget::initializeGL()
 
 	initCylinder();
 	initTaper();
-	initOval();
-	initCone();
+	initCone(ovalVAO, ovalVBO, vertexNumOfOval,3.0f, 3.5f, 2.0f);
+	initCone(coneVAO, coneVBO, vertexNumOfCone, 3.5f, 4.0f, 3.0f);
 
 	initRestaurant();
 	initSkybox();
@@ -728,10 +728,10 @@ void MyGLWidget::drawTorus(float innerRadius, float OutRadius) {
 		}
 	}
 	// 生成VAO和VBO并绑定
-	glGenVertexArrays(1, &VAOOutButtomId);
-	glBindVertexArray(VAOOutButtomId);
-	glGenBuffers(1, &VBOOutButtomId);
-	glBindBuffer(GL_ARRAY_BUFFER, VBOOutButtomId);
+	glGenVertexArrays(1, &outButtomVAO);
+	glBindVertexArray(outButtomVAO);
+	glGenBuffers(1, &outButtomVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, outButtomVBO);
 	// 把之前定义的顶点数据复制到缓冲的内存中
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verties), verties, GL_STATIC_DRAW);
 	// 设置顶点属性指针
@@ -744,7 +744,7 @@ void MyGLWidget::drawTorus(float innerRadius, float OutRadius) {
 	// 解绑VAO
 	glBindVertexArray(0);
 
-	glBindVertexArray(VAOOutButtomId);
+	glBindVertexArray(outButtomVAO);
 	updateShader();
 	glDrawArrays(GL_QUAD_STRIP, 0, 2 * (Sides + 1) * (Rings + 1));
 	glBindVertexArray(0);
@@ -1209,174 +1209,8 @@ void MyGLWidget::initTaper()
 	glBindVertexArray(0);
 }
 
-void MyGLWidget::initOval()
-{
-	std::vector<GLfloat> ovalupVertices;    // 保存了椭圆顶部圆顶点位置信息
-	std::vector<GLfloat> ovaldownVertices;  // 保存了椭圆底部圆顶点位置信息
-	std::vector<GLfloat> ovalVertices;      // 保存了椭圆体顶点信息 包括位置和法向量
-
-	ovalupVertices.resize(4 * 3 * 3);
-	ovaldownVertices.resize(4 * 3 * 3);
-	for (int i = 0; i < 4 * 3 * 3; i++)
-	{
-		// 指定上下底面两个圆的半径
-		ovalupVertices[i] = initialTriangle[i] * 3;
-		ovaldownVertices[i] = initialTriangle[i] * 3.5;
-	}
-
-	subdivideTriangle(ITERATIONS, ovalupVertices, 3);
-	subdivideTriangle(ITERATIONS, ovaldownVertices, 3.5);
-
-	vertexNumOfOval = ovalupVertices.size() / 3 * (1 + 2) + ovaldownVertices.size() / 3;
-
-	vector<GLfloat> upperVertices; // 上圆
-	vector<GLfloat> lowerVertices; // 下圆
-	vector<GLfloat> sideVertices; // 侧面
-
-	float deltaAngle = 360.0 / (ovalupVertices.size() / 9);
-
-	for (int i = 0; i < ovalupVertices.size() / 3; i++)
-	{
-		// 顶点位置
-		upperVertices.push_back(ovalupVertices[i * 3]);
-		upperVertices.push_back(ovalupVertices[i * 3 + 1] + 2.0f);
-		upperVertices.push_back(ovalupVertices[i * 3 + 2]);
-		//法向量 竖直向上
-		upperVertices.push_back(0.0f);
-		upperVertices.push_back(1.0f);
-		upperVertices.push_back(0.0f);
-		//纹理坐标
-		if (i % 3 == 0)
-		{
-			upperVertices.push_back(0.5f);
-			upperVertices.push_back(0.5f);
-		}
-		else if (i % 3 == 1)
-		{
-			int triangleIndex = i / 3;
-			float theta = 360.0 - deltaAngle * triangleIndex;
-			upperVertices.push_back(0.5f + 0.5 * sin(theta * PI / 180));
-			upperVertices.push_back(0.5f + 0.5 * cos(theta * PI / 180));
-		}
-		else if (i % 3 == 2)
-		{
-			int triangleIndex = i / 3 + 1;
-			float theta = 360.0 - deltaAngle * triangleIndex;
-			upperVertices.push_back(0.5f + 0.5 * sin(theta * PI / 180));
-			upperVertices.push_back(0.5f + 0.5 * cos(theta * PI / 180));
-		}
-	}
-
-	for (int i = 0; i < ovaldownVertices.size() / 3; i++)
-	{
-		//顶点位置
-		lowerVertices.push_back(ovaldownVertices[i * 3]);
-		lowerVertices.push_back(ovaldownVertices[i * 3 + 1] + 0.0f);
-		lowerVertices.push_back(ovaldownVertices[i * 3 + 2]);
-		//法向量 竖直向下
-		lowerVertices.push_back(0.0f);
-		lowerVertices.push_back(-1.0f);
-		lowerVertices.push_back(0.0f);
-
-		if (i % 3 == 0)
-		{
-			lowerVertices.push_back(0.5f);
-			lowerVertices.push_back(0.5f);
-		}
-		else if (i % 3 == 1)
-		{
-			int triangleIndex = i / 3;
-			float theta = 360.0 - deltaAngle * triangleIndex;
-			lowerVertices.push_back(0.5f + 0.5 * sin(theta * PI / 180));
-			lowerVertices.push_back(0.5f + 0.5 * cos(theta * PI / 180));
-		}
-		else if (i % 3 == 2)
-		{
-			int triangleIndex = i / 3 + 1;
-			float theta = 360.0 - deltaAngle * triangleIndex;
-			lowerVertices.push_back(0.5f + 0.5 * sin(theta * PI / 180));
-			lowerVertices.push_back(0.5f + 0.5 * cos(theta * PI / 180));
-		}
-	}
-
-	// 设置侧面中曲面相关的顶点信息
-	// 上下两个细分三角形的原点对边 构成一个侧面细分梯形
-	int numOfTriangles = ovalupVertices.size() / 3 / 3;
-	for (int i = 0; i < ovalupVertices.size() / 3 / 3; i++)
-	{
-		// 记上面的细分三角形为a, 下面的细分三角形为b
-		// v1 v2 和v3 分别为原细分三角形的三个顶点
-		GLfloat vu1[3], vu2[3], vu3[3], vd1[3], vd2[3], vd3[3];
-		GLfloat va1[3], va2[3], va3[3], vb1[3], vb2[3], vb3[3];
-		for (int j = 0; j < 3; j++)
-		{
-			vu1[j] = ovalupVertices[i * 9 + j];
-			vu2[j] = ovalupVertices[i * 9 + j + 3];
-			vu3[j] = ovalupVertices[i * 9 + j + 6];
-			vd1[j] = ovaldownVertices[i * 9 + j];
-			vd2[j] = ovaldownVertices[i * 9 + j + 3];
-			vd3[j] = ovaldownVertices[i * 9 + j + 6];
-
-			va1[j] = upperVertices[i * 24 + j];
-			va2[j] = upperVertices[i * 24 + j + 8];
-			va3[j] = upperVertices[i * 24 + j + 16];
-			vb1[j] = lowerVertices[i * 24 + j];
-			vb2[j] = lowerVertices[i * 24 + j + 8];
-			vb3[j] = lowerVertices[i * 24 + j + 16];
-		}
-
-		addVertex(va2[0], va2[1], va2[2], sideVertices);
-		addVertex(vu2[0], vu2[1] + 0.75f, vu2[2], sideVertices);
-		sideVertices.push_back(1.0f / numOfTriangles * i);
-		sideVertices.push_back(1.0f);
-		addVertex(vb2[0], vb2[1], vb2[2], sideVertices);
-		addVertex(vd2[0], vd2[1] + 0.88f, vd2[2], sideVertices);
-		sideVertices.push_back(1.0f / numOfTriangles * i);
-		sideVertices.push_back(0.0f);
-		addVertex(va3[0], va3[1], va3[2], sideVertices);
-		addVertex(vu3[0], vu3[1] + 0.75f, vu3[2], sideVertices);
-		sideVertices.push_back(1.0f / numOfTriangles * (i + 1));
-		sideVertices.push_back(1.0f);
-
-		addVertex(va3[0], va3[1], va3[2], sideVertices);
-		addVertex(vu3[0], vu3[1] + 0.75f, vu3[2], sideVertices);
-		sideVertices.push_back(1.0f / numOfTriangles * (i + 1));
-		sideVertices.push_back(1.0f);
-		addVertex(vb2[0], vb2[1], vb2[2], sideVertices);
-		addVertex(vd2[0], vd2[1] + 0.88f, vd2[2], sideVertices);
-		sideVertices.push_back(1.0f / numOfTriangles * i);
-		sideVertices.push_back(0.0f);
-		addVertex(vb3[0], vb3[1], vb3[2], sideVertices);
-		addVertex(vd3[0], vd3[1] + 0.88f, vd3[2], sideVertices);
-		sideVertices.push_back(1.0f / numOfTriangles * (i + 1));
-		sideVertices.push_back(0.0f);
-	}
-	ovalVertices.insert(ovalVertices.end(), upperVertices.begin(), upperVertices.end());
-	ovalVertices.insert(ovalVertices.end(), lowerVertices.begin(), lowerVertices.end());
-	ovalVertices.insert(ovalVertices.end(), sideVertices.begin(), sideVertices.end());
-
-	// 创建VAO并绑定
-	glGenVertexArrays(1, &ovalVAO);
-	glBindVertexArray(ovalVAO);
-	glGenBuffers(1, &ovalVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, ovalVBO);
-	glBufferData(GL_ARRAY_BUFFER, ovalVertices.size() * sizeof(GLfloat), &ovalVertices[0], GL_STATIC_DRAW);
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	//glEnableVertexAttribArray(1);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(2);
-	// 解绑定
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-}
-
-void MyGLWidget::initCone()
+void MyGLWidget::initCone(GLuint &givenVAO, GLuint &givenVBO, int &vertexNum, 
+	float upperRadius, float lowerRadius, float height)
 {
 	std::vector<GLfloat> coneupVertices;    // 保存了圆台顶部圆顶点位置信息
 	std::vector<GLfloat> conedownVertices;  // 保存了圆台底部圆顶点位置信息
@@ -1387,14 +1221,14 @@ void MyGLWidget::initCone()
 	for (int i = 0; i < 4 * 3 * 3; i++)
 	{
 		// 指定上下底面两个圆的半径
-		coneupVertices[i] = initialTriangle[i] * 3.5;
-		conedownVertices[i] = initialTriangle[i] * 4;
+		coneupVertices[i] = initialTriangle[i] * upperRadius;
+		conedownVertices[i] = initialTriangle[i] * lowerRadius;
 	}
 
-	subdivideTriangle(ITERATIONS, coneupVertices, 3.5);
-	subdivideTriangle(ITERATIONS, conedownVertices, 4);
+	subdivideTriangle(ITERATIONS, coneupVertices, upperRadius);
+	subdivideTriangle(ITERATIONS, conedownVertices, lowerRadius);
 
-	vertexNumOfCone = coneupVertices.size() / 3 * (1 + 2) + conedownVertices.size() / 3;
+	vertexNum = coneupVertices.size() / 3 * (1 + 2) + conedownVertices.size() / 3;
 	vector<GLfloat> upperVertices; // 上圆
 	vector<GLfloat> lowerVertices; // 下圆
 	vector<GLfloat> sideVertices; // 侧面
@@ -1405,7 +1239,7 @@ void MyGLWidget::initCone()
 	{
 		// 顶点位置
 		upperVertices.push_back(coneupVertices[i * 3]);
-		upperVertices.push_back(coneupVertices[i * 3 + 1] + 3.0f);
+		upperVertices.push_back(coneupVertices[i * 3 + 1] + height);
 		upperVertices.push_back(coneupVertices[i * 3 + 2]);
 		//法向量 竖直向上
 		upperVertices.push_back(0.0f);
@@ -1490,29 +1324,31 @@ void MyGLWidget::initCone()
 			vb3[j] = lowerVertices[i * 24 + j + 16];
 		}
 
+		float k = (lowerRadius - upperRadius) / height;	// 侧面斜率的倒数
+
 		addVertex(va2[0], va2[1], va2[2], sideVertices);
-		addVertex(vu2[0], vu2[1] + 0.58f, vu2[2], sideVertices);
+		addVertex(vu2[0], upperRadius * k, vu2[2], sideVertices);
 		sideVertices.push_back(1.0f / numOfTriangles * i);
 		sideVertices.push_back(1.0f);
 		addVertex(vb2[0], vb2[1], vb2[2], sideVertices);
-		addVertex(vd2[0], vd2[1] + 0.67f, vd2[2], sideVertices);
+		addVertex(vd2[0], lowerRadius * k, vd2[2], sideVertices);
 		sideVertices.push_back(1.0f / numOfTriangles * i);
 		sideVertices.push_back(0.0f);
 		addVertex(va3[0], va3[1], va3[2], sideVertices);
-		addVertex(vu3[0], vu3[1] + 0.58f, vu3[2], sideVertices);
+		addVertex(vu3[0], upperRadius * k, vu3[2], sideVertices);
 		sideVertices.push_back(1.0f / numOfTriangles * (i + 1));
 		sideVertices.push_back(1.0f);
 
 		addVertex(va3[0], va3[1], va3[2], sideVertices);
-		addVertex(vu3[0], vu3[1] + 0.58f, vu3[2], sideVertices);
+		addVertex(vu3[0], upperRadius * k, vu3[2], sideVertices);
 		sideVertices.push_back(1.0f / numOfTriangles * (i + 1));
 		sideVertices.push_back(1.0f);
 		addVertex(vb2[0], vb2[1], vb2[2], sideVertices);
-		addVertex(vd2[0], vd2[1] + 0.67f, vd2[2], sideVertices);
+		addVertex(vd2[0], lowerRadius* k, vd2[2], sideVertices);
 		sideVertices.push_back(1.0f / numOfTriangles * i);
 		sideVertices.push_back(0.0f);
 		addVertex(vb3[0], vb3[1], vb3[2], sideVertices);
-		addVertex(vd3[0], vd3[1] + 0.67f, vd3[2], sideVertices);
+		addVertex(vd3[0], lowerRadius* k, vd3[2], sideVertices);
 		sideVertices.push_back(1.0f / numOfTriangles * (i + 1));
 		sideVertices.push_back(0.0f);
 	}
@@ -1521,10 +1357,10 @@ void MyGLWidget::initCone()
 	coneVertices.insert(coneVertices.end(), sideVertices.begin(), sideVertices.end());
 
 	// 创建VAO并绑定
-	glGenVertexArrays(1, &coneVAO);
-	glBindVertexArray(coneVAO);
-	glGenBuffers(1, &coneVBO);
-	glBindBuffer(GL_ARRAY_BUFFER, coneVBO);
+	glGenVertexArrays(1, &givenVAO);
+	glBindVertexArray(givenVAO);
+	glGenBuffers(1, &givenVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, givenVBO);
 	glBufferData(GL_ARRAY_BUFFER, coneVertices.size() * sizeof(GLfloat), &coneVertices[0], GL_STATIC_DRAW);
 	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
 	//glEnableVertexAttribArray(0);
