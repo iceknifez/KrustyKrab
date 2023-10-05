@@ -1,5 +1,5 @@
-#ifndef MYGLWIDGET_H
-#define MYGLWIDGET_H
+#ifndef __MYGLWIDGET_H__
+#define __MYGLWIDGET_H__
 
 #ifdef MAC_OS
 #include <QtOpenGL/QtOpenGL>
@@ -24,6 +24,7 @@
 
 #include <unordered_map>
 #include "shape_coordinate.h"
+#include "helper.h"
 
 class MyGLWidget : public QOpenGLWidget, QOpenGLFunctions_3_3_Core {
     Q_OBJECT
@@ -110,18 +111,6 @@ protected:
     // 初始化绘制天空盒所需信息
     void initSkybox();
 
-    /* 辅助函数 */
-
-    // 细分得到半圆 结果保存在semicircleVertices数组中
-    void subdivideSemicircle(int depth, std::vector<GLfloat>& v);
-    // 细分得到圆 结果保存在circleVertices数组中
-    void subdivideCircle(int depth, std::vector<GLfloat>& v, float length);
-    // 通过两个原有顶点位置计算得到新的中点位置
-    void getHalf(GLfloat v1[], GLfloat v2[], GLfloat v12[], GLfloat scale = 1.0f);
-    // 将三角形v1v2v3的顶点信息添加到vertices数组中
-    void addTriangle(GLfloat v1[], GLfloat v2[], GLfloat v3[], std::vector<GLfloat>& v);
-    void addVertex(GLfloat x, GLfloat y, GLfloat z, std::vector<GLfloat>& v);
-
 private:
     QTimer* timer;
     
@@ -205,4 +194,4 @@ private:
     std::stringstream vertexShaderStream;
     std::stringstream fragmentShaderStream;
 };
-#endif // MYGLWIDGET_H
+#endif // __MYGLWIDGET_H__

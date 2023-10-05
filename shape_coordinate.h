@@ -1,5 +1,5 @@
-﻿#ifndef SHAPE_COORDINATE_H
-#define SHAPE_COORDINATE_H
+﻿#ifndef __SHAPE_COORDINATE_H__
+#define __SHAPE_COORDINATE_H__
 
 #include <GL/glew.h>
 
@@ -16,4 +16,4 @@ extern GLfloat restaurant_side2[24 * 4 * 8];
 // 天空盒（正方体）
 extern GLfloat skyboxVertices[12 * 3 * 8];
 
-#endif // SHAPE_COORDINATE_H
+#endif // __SHAPE_COORDINATE_H__
