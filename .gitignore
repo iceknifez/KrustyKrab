@@ -4,4 +4,4 @@ release
 .qmake.stash
 *.pro.user
 *.sln
-*.vcxproj*
+*.vcxproj.*

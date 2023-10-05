@@ -16,4 +16,4 @@ extern GLfloat restaurant_side2[24 * 4 * 8];
 // 天空盒（正方体）
 extern GLfloat skyboxVertices[12 * 3 * 8];
 
-#endif
+#endif // SHAPE_COORDINATE_H

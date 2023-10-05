@@ -107,17 +107,17 @@ protected:
     // 绘制圆锥
     void drawTaper(float tx, float ty, float tz, float angle, float rx, float ry, float rz);
 
-    // 初始化cylinderVBO 该vbo保存了绘制圆柱体的信息
-    void initCylinderVBO();
+    // 初始化cylinderVBO和cylinderVAO 保存了绘制圆柱体的信息
+    void initCylinder();
     // 细分得到圆 结果保存在circleVertices数组中
     void subdivideCircle(int depth, std::vector<GLfloat>& v, float length);
 
-    // 初始化taperVBO 该vbo保存了绘制圆锥体的信息
-    void initTaperVBO();
-    // 初始化ovalVBO 该vbo保存了绘制椭圆体的信息
-    void initOvalVBO();
-    // 初始化coneVBO 该vbo保存了绘制圆台的信息
-    void initConeVBO();
+    // 初始化taperVBO和taperVAO 保存了绘制圆锥体的信息
+    void initTaper();
+    // 初始化ovalVBO和ovalVAO 保存了绘制椭圆体的信息
+    void initOval();
+    // 初始化coneVBO和coneVAO 保存了绘制圆台的信息
+    void initCone();
 
     /* *********************** */
 
@@ -178,9 +178,13 @@ private:
     /* *********************** */
 
     GLuint cylinderVBO; // 保存了绘制圆柱体的信息 包括顶点位置和法向量
-    GLuint taperVBO; // 保存了绘制圆锥的信息，包括顶点位置和法向量
-    GLuint ovalVBO; // 保存了绘制椭圆柱的信息，包括顶点位置和法向量
-    GLuint coneVBO; // 保存了绘制圆台的信息，包括顶点位置和法向量
+    GLuint cylinderVAO; // 保存了绘制圆柱体的信息 用于管理顶点属性的状态
+    GLuint taperVBO; // 保存了绘制圆锥的信息 包括顶点位置和法向量
+    GLuint taperVAO; // 保存了绘制圆锥的信息 用于管理顶点属性的状态
+    GLuint ovalVBO; // 保存了绘制椭圆柱的信息 包括顶点位置和法向量
+    GLuint ovalVAO; // 保存了绘制椭圆柱的信息 用于管理顶点属性的状态
+    GLuint coneVBO; // 保存了绘制圆台的信息 包括顶点位置和法向量
+    GLuint coneVAO; // 保存了绘制圆台的信息 用于管理顶点属性的状态
     std::vector<GLfloat> circleVertices;    // 保存了圆顶点位置
     std::vector<GLfloat> cylinderVertices;  // 保存了圆柱体顶点信息 包括位置和法向量
     std::vector<GLfloat> taperVertices;     // 保存了圆锥顶点信息 包括位置和法向量
@@ -192,6 +196,7 @@ private:
     std::vector<GLfloat> conedownVertices;  // 保存了圆台底部圆顶点位置信息
     std::vector<GLfloat> coneVertices;      // 保存了圆台体定点信息 包括位置和法向量
     int vertexNumOfCylinder;    // 绘制圆柱体所需的顶点数量
+    int vertexNumOfTaper;    // 绘制圆锥所需的顶点数量
     int vertexNumOfOval;    // 绘制椭圆柱体所需的顶点数量
     int vertexNumOfCone; // 绘制圆台所需的顶点数量
 

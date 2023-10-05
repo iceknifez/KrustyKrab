@@ -48,10 +48,10 @@ void MyGLWidget::initializeGL()
 	initCube();
 	initSemicylinder();
 
-	initCylinderVBO();
-	initTaperVBO();
-	initOvalVBO();
-	initConeVBO();
+	initCylinder();
+	initTaper();
+	initOval();
+	initCone();
 
 	initRestaurant();
 	initSkybox();
@@ -828,7 +828,9 @@ void MyGLWidget::drawRestaurant() {
 
 	// 绘制底部、门板和屋顶下部
 	useTexture = 1;	// 使用漫反射纹理贴图
-	setDiffuseMap("img/wood7.jpg");	// 指定图片
+	//setDiffuseMap("img/wood7.jpg");	// 指定图片
+	setDiffuseMap("img/wood3.png");	// 指定图片
+	//setDiffuseMap("img/test.png");	// 指定图片
 	glPushMatrix();
 	glBindVertexArray(quadsVAO);
 	updateShader();	// 每次进行绘制之前要调用该方法
@@ -1029,21 +1031,9 @@ void MyGLWidget::drawOval(float tx, float ty, float tz, float angle, float rx, f
 	glRotatef(angle, rx, ry, rz);
 	updateShader();
 
-	glBindBuffer(GL_ARRAY_BUFFER, ovalVBO);
-
-	// 指定顶点属性数组的数据格式和位置
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	//glEnableVertexAttribArray(1);
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(2);
+	glBindVertexArray(ovalVAO);
 	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfOval);
+	glBindVertexArray(0);
 	glPopMatrix();
 }
 
@@ -1054,21 +1044,9 @@ void MyGLWidget::drawCone(float tx, float ty, float tz, float angle, float rx, f
 	glRotatef(angle, rx, ry, rz);
 	updateShader();
 
-	glBindBuffer(GL_ARRAY_BUFFER, coneVBO);
-
-	// 指定顶点属性数组的数据格式和位置
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	//glEnableVertexAttribArray(1);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(2);
-
+	glBindVertexArray(coneVAO);
 	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfCone);
+	glBindVertexArray(0);
 	glPopMatrix();
 }
 
@@ -1081,21 +1059,9 @@ void MyGLWidget::drawCylinder(float tx, float ty, float tz, float sx, float sy, 
 	glRotatef(angle, rx, ry, rz);
 	updateShader();
 
-	glBindBuffer(GL_ARRAY_BUFFER, cylinderVBO);
-
-	// 指定顶点属性数组的数据格式和位置
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	//glEnableVertexAttribArray(1);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(2);
-
+	glBindVertexArray(cylinderVAO);
 	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfCylinder);
+	glBindVertexArray(0);
 	glPopMatrix();
 }
 
@@ -1106,20 +1072,13 @@ void MyGLWidget::drawTaper(float tx, float ty, float tz, float angle, float rx, 
 	glRotatef(angle, rx, ry, rz);
 	updateShader();
 
-	glBindBuffer(GL_ARRAY_BUFFER, taperVBO);
-
-	// 指定顶点属性数组的数据格式和位置
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-
-	//glDrawArrays(GL_TRIANGLES, 0, taperVertices.size() / 2);
-	glDrawArrays(GL_TRIANGLES, 0, taperVertices.size() / 2 / 3);
+	glBindVertexArray(taperVAO);
+	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfTaper);
+	glBindVertexArray(taperVAO);
 	glPopMatrix();
 }
 
-void MyGLWidget::initCylinderVBO()
+void MyGLWidget::initCylinder()
 {
 	// 四个三角形，作为圆迭代的开始
 	GLfloat temp[4 * 3 * 3] =
@@ -1148,7 +1107,7 @@ void MyGLWidget::initCylinderVBO()
 		circleVertices[i] = temp[i];
 	}
 
-	// 迭代10次 函数调用完成后circleVertices中保存了绘制半圆的顶点信息
+	// 迭代10次 函数调用完成后circleVertices中保存了绘制圆的顶点信息
 	// 圆由许多细分三角形组成 每个三角形以原点为起点 按顺时针方向保存顶点信息
 	subdivideCircle(ITERATIONS, circleVertices, 1);
 
@@ -1274,6 +1233,10 @@ void MyGLWidget::initCylinderVBO()
 	cylinderVertices.insert(cylinderVertices.end(), lowerVertices.begin(), lowerVertices.end());
 	cylinderVertices.insert(cylinderVertices.end(), sideVertices.begin(), sideVertices.end());
 
+	// 创建VAO并绑定
+	glGenVertexArrays(1, &cylinderVAO);
+	glBindVertexArray(cylinderVAO);
+
 	glGenBuffers(1, &cylinderVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, cylinderVBO);
 	glBufferData(GL_ARRAY_BUFFER, cylinderVertices.size() * sizeof(GLfloat), &cylinderVertices[0], GL_STATIC_DRAW);
@@ -1287,7 +1250,9 @@ void MyGLWidget::initCylinderVBO()
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(2);
+	// 解绑定
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
 void MyGLWidget::subdivideCircle(int depth, vector<GLfloat>& vertices, float length)
@@ -1330,7 +1295,7 @@ void MyGLWidget::subdivideCircle(int depth, vector<GLfloat>& vertices, float len
 	subdivideCircle(depth - 1, vertices, length);
 }
 
-void MyGLWidget::initTaperVBO()
+void MyGLWidget::initTaper()
 {
 	// 四个三角形 作为圆迭代的开始
 	GLfloat temp[4 * 3 * 3] =
@@ -1405,6 +1370,11 @@ void MyGLWidget::initTaperVBO()
 	taperVertices.insert(taperVertices.end(), lowerVertices.begin(), lowerVertices.end());
 	taperVertices.insert(taperVertices.end(), sideVertices.begin(), sideVertices.end());
 
+	vertexNumOfTaper = taperVertices.size() / 2 / 3;
+
+	// 创建VAO并绑定
+	glGenVertexArrays(1, &taperVAO);
+	glBindVertexArray(taperVAO);
 	// 为VBO创建一个缓冲区对象
 	glGenBuffers(1, &taperVBO);
 	// 利用vertices数组中的内容更新VBO的信息
@@ -1417,9 +1387,10 @@ void MyGLWidget::initTaperVBO()
 	glEnableVertexAttribArray(1);
 	// 解绑定
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
-void MyGLWidget::initOvalVBO()
+void MyGLWidget::initOval()
 {
 	// 四个三角形，作为圆迭代的开始
 	GLfloat tempup[4 * 3 * 3] =
@@ -1599,6 +1570,9 @@ void MyGLWidget::initOvalVBO()
 	ovalVertices.insert(ovalVertices.end(), lowerVertices.begin(), lowerVertices.end());
 	ovalVertices.insert(ovalVertices.end(), sideVertices.begin(), sideVertices.end());
 
+	// 创建VAO并绑定
+	glGenVertexArrays(1, &ovalVAO);
+	glBindVertexArray(ovalVAO);
 	glGenBuffers(1, &ovalVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, ovalVBO);
 	glBufferData(GL_ARRAY_BUFFER, ovalVertices.size() * sizeof(GLfloat), &ovalVertices[0], GL_STATIC_DRAW);
@@ -1612,10 +1586,12 @@ void MyGLWidget::initOvalVBO()
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(2);
+	// 解绑定
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
-void MyGLWidget::initConeVBO()
+void MyGLWidget::initCone()
 {
 	// 四个三角形，作为圆迭代的开始
 	GLfloat tempup[4 * 3 * 3] =
@@ -1793,6 +1769,9 @@ void MyGLWidget::initConeVBO()
 	coneVertices.insert(coneVertices.end(), lowerVertices.begin(), lowerVertices.end());
 	coneVertices.insert(coneVertices.end(), sideVertices.begin(), sideVertices.end());
 
+	// 创建VAO并绑定
+	glGenVertexArrays(1, &coneVAO);
+	glBindVertexArray(coneVAO);
 	glGenBuffers(1, &coneVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, coneVBO);
 	glBufferData(GL_ARRAY_BUFFER, coneVertices.size() * sizeof(GLfloat), &coneVertices[0], GL_STATIC_DRAW);
@@ -1806,7 +1785,9 @@ void MyGLWidget::initConeVBO()
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(2);
+	// 解绑定
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 
 void MyGLWidget::DrawSkybox()
