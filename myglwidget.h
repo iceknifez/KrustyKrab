@@ -44,7 +44,7 @@ protected:
     // 更新着色器的信息 每次绘制前调用
     void updateShader();
 
-    /* 状态信息设置函数 */
+    /* ******************** 状态信息设置函数 ******************** */
 
     // 设置漫反射纹理贴图
     void setDiffuseMap(const char* imagePath);
@@ -59,7 +59,7 @@ protected:
     // 检测用户是否按下键盘 并对摄像机进行设置
     void setCamera(int key);
 
-    /* 各部件绘制函数 */
+    /* ******************** 各部件绘制函数 ******************** */
 
     void drawCashier();
     void drawRestaurant();
@@ -67,7 +67,7 @@ protected:
     void drawDesk();
     void drawChair();
 
-    /* 基本形状绘制函数 */
+    /* ******************** 基本形状绘制函数 ******************** */
 
     // 根据指定的位移和缩放绘制长方体
     void drawCuboid(float tx, float ty, float tz, float sx, float sy, float sz,
@@ -78,16 +78,16 @@ protected:
     // 根据指定的位移和缩放绘制圆柱体
     void drawCylinder(float tx, float ty, float tz, float sx, float sy, float sz,
         float angle, float rx, float ry, float rz);
-    // 根据指定的位移绘制椭圆柱体
-    void drawOval(float tx, float ty, float tz, float angle, float rx, float ry, float rz);
-    // 根据指定的位移绘制圆台体
-    void drawCone(float tx, float ty, float tz, float angle, float rx, float ry, float rz);
+    // 根据指定的位移绘制圆台体(较缓)
+    void drawFrustum1(float tx, float ty, float tz, float angle, float rx, float ry, float rz);
+    // 根据指定的位移绘制圆台体(较陡)
+    void drawFrustum2(float tx, float ty, float tz, float angle, float rx, float ry, float rz);
     // 绘制圆锥
-    void drawTaper(float tx, float ty, float tz, float angle, float rx, float ry, float rz);
+    void drawCone(float tx, float ty, float tz, float angle, float rx, float ry, float rz);
     // 绘制半圆环
     void drawTorus(float innerRadius, float OutRadius);
 
-    /* 初始化相关函数 */
+    /* ******************** 初始化相关函数 ******************** */
 
     // 初始化cubeVBO和cubeVAO 保存了绘制正方体的信息
     void initCube();
@@ -98,7 +98,7 @@ protected:
     // 初始化taperVBO和taperVAO 保存了绘制圆锥体的信息
     void initTaper();
     // 初始化givenVAO和givenVBO 保存了绘制上圆半径upperRadius下圆半径lowerRadius的圆台的信息
-    void initCone(GLuint &givenVAO, GLuint &givenVBO, int &vertexNum,
+    void initFrustum(GLuint &givenVAO, GLuint &givenVBO, int &vertexNum,
         float upperRadius = 1.0f, float lowerRadius = 1.0f, float height = 1.0f);
     // 初始化绘制餐厅所需信息
     void initRestaurant();
@@ -112,7 +112,7 @@ private:
     GLuint fragmentShader;
     GLuint program;
     
-    /* 纹理贴图相关 */
+    /* ******************** 纹理贴图相关 ******************** */
 
     // 控制是否使用漫反射纹理贴图 1为使用 0为不使用
     GLint useTexture = 0;
@@ -121,7 +121,7 @@ private:
     // 记录所有图像路径和编号(即第几个图像)的映射关系
     std::unordered_map<const char*, int> imgpath2index;
 
-    /* 形状顶点信息 */
+    /* ******************** 形状顶点信息 ******************** */
 
     GLuint cubeVBO; // 保存了绘制正方体的信息 包括顶点位置和法向量
     GLuint cubeVAO; // 保存了绘制正方体的信息 用于管理顶点属性的状态
@@ -137,20 +137,20 @@ private:
 
     GLuint cylinderVBO; // 保存了绘制圆柱体的信息 包括顶点位置和法向量
     GLuint cylinderVAO; // 保存了绘制圆柱体的信息 用于管理顶点属性的状态
-    GLuint taperVBO; // 保存了绘制圆锥的信息 包括顶点位置和法向量
-    GLuint taperVAO; // 保存了绘制圆锥的信息 用于管理顶点属性的状态
-    GLuint ovalVBO; // 保存了绘制椭圆柱的信息 包括顶点位置和法向量
-    GLuint ovalVAO; // 保存了绘制椭圆柱的信息 用于管理顶点属性的状态
-    GLuint coneVBO; // 保存了绘制圆台的信息 包括顶点位置和法向量
-    GLuint coneVAO; // 保存了绘制圆台的信息 用于管理顶点属性的状态
+    GLuint coneVBO;     // 保存了绘制圆锥的信息 包括顶点位置和法向量
+    GLuint coneVAO;     // 保存了绘制圆锥的信息 用于管理顶点属性的状态
+    GLuint frustumVBO1; // 保存了绘制圆台(较缓)的信息 包括顶点位置和法向量
+    GLuint frustumVAO1; // 保存了绘制圆台(较缓)的信息 用于管理顶点属性的状态
+    GLuint frustumVBO2; // 保存了绘制圆台(较陡)的信息 包括顶点位置和法向量
+    GLuint frustumVAO2; // 保存了绘制圆台(较陡)的信息 用于管理顶点属性的状态
 
     int vertexNumOfSemicylinder;    // 绘制半圆柱体所需的顶点数量
-    int vertexNumOfCylinder;    // 绘制圆柱体所需的顶点数量
-    int vertexNumOfTaper;    // 绘制圆锥所需的顶点数量
-    int vertexNumOfOval;    // 绘制椭圆柱体所需的顶点数量
-    int vertexNumOfCone; // 绘制圆台所需的顶点数量
+    int vertexNumOfCylinder;        // 绘制圆柱体所需的顶点数量
+    int vertexNumOfTaper;           // 绘制圆锥所需的顶点数量
+    int vertexNumOfFrustum1;        // 绘制圆台(较缓)所需的顶点数量
+    int vertexNumOfFrustum2;        // 绘制圆台(较陡)所需的顶点数量
 
-    /* 状态信息 */
+    /* ******************** 状态信息 ******************** */
 
     float lightPos[3] = { 50.0f, 50.0f, 50.0f };      // 光源位置
     float viewPos[3] = { 0.0f, 100.0f, 700.0f };     // 观察位置
@@ -166,7 +166,7 @@ private:
     float xRate = 1.0f;
     float zRate = 0.0f;
 
-    /* 其他参数 */
+    /* ******************** 其他参数 ******************** */
 
     const float ITERATIONS = 10;    // 细分三角形迭代次数
     const float PI = 3.14;

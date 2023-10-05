@@ -48,8 +48,8 @@ void MyGLWidget::initializeGL()
 
 	initCylinder();
 	initTaper();
-	initCone(ovalVAO, ovalVBO, vertexNumOfOval,3.0f, 3.5f, 2.0f);
-	initCone(coneVAO, coneVBO, vertexNumOfCone, 3.5f, 4.0f, 3.0f);
+	initFrustum(frustumVAO1, frustumVBO1, vertexNumOfFrustum1,3.0f, 3.5f, 2.0f);
+	initFrustum(frustumVAO2, frustumVBO2, vertexNumOfFrustum2, 3.5f, 4.0f, 3.0f);
 
 	initRestaurant();
 	initSkybox();
@@ -282,7 +282,7 @@ void MyGLWidget::updateShader()
 	glUniform1f(matShineLoc, 32.0f);
 }
 
-/* 状态信息设置函数 */
+/* ******************** 状态信息设置函数 ******************** */
 
 void MyGLWidget::setDiffuseMap(const char* imagePath)
 {
@@ -422,7 +422,7 @@ void MyGLWidget::setCamera(int key)
 	gluLookAt(viewPos[0], viewPos[1], viewPos[2], viewDesPos[0], viewDesPos[1], viewDesPos[2], 0, 1, 0);
 }
 
-/* 各部件绘制函数 */
+/* ******************** 各部件绘制函数 ******************** */
 
 void MyGLWidget::drawCashier()
 {
@@ -514,20 +514,19 @@ void MyGLWidget::drawDesk()
 	// 六个装饰
 	useTexture = 0;
 	setObjectColor(192 / 255.0f, 0.0f, 0.0f);
-	drawTaper(-19.0f, 21.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	drawTaper(-9.5f, 21.0f, 16.45f, 60.0f, 0.0f, 1.0f, 0.0f);
-	drawTaper(9.5f, 21.0f, 16.45f, 120.0f, 0.0f, 1.0f, 0.0f);
-	drawTaper(19.0f, 21.0f, 0.0f, 180.0f, 0.0f, 1.0f, 0.0f);
-	drawTaper(9.5f, 21.0f, -16.45f, 240.0f, 0.0f, 1.0f, 0.0f);
-	drawTaper(-9.5f, 21.0f, -16.45f, 300.0f, 0.0f, 1.0f, 0.0f);
+	drawCone(-19.0f, 21.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	drawCone(-9.5f, 21.0f, 16.45f, 60.0f, 0.0f, 1.0f, 0.0f);
+	drawCone(9.5f, 21.0f, 16.45f, 120.0f, 0.0f, 1.0f, 0.0f);
+	drawCone(19.0f, 21.0f, 0.0f, 180.0f, 0.0f, 1.0f, 0.0f);
+	drawCone(9.5f, 21.0f, -16.45f, 240.0f, 0.0f, 1.0f, 0.0f);
+	drawCone(-9.5f, 21.0f, -16.45f, 300.0f, 0.0f, 1.0f, 0.0f);
 }
 
 void MyGLWidget::drawChair()
 {
-
 	// 绘制桶上沿
 	useTexture = 1;
-	setDiffuseMap("img/chair1_2.png");
+	setDiffuseMap("img/chair1.png");
 	glPushMatrix();
 	glTranslatef(0.0f, 12.0f, 0.0f);
 	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
@@ -543,15 +542,15 @@ void MyGLWidget::drawChair()
 	glPopMatrix();
 
 	//绘制水桶
-	drawOval(0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	drawCone(0.0f, 7.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-	drawCylinder(0.0f, 6.0f, 0.0f, 4.0f, 2.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	drawFrustum1(0.0f, 10.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	drawFrustum2(0.0f, 7.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 	glPushMatrix();
 	glRotatef(177.0f, 0.0f, 1.0f, 0.0f);
-	drawCone(0.0f, 5.0f, 0.0f, 180.0f, 1.0f, 0.0f, 0.0f);
-	drawOval(0.0f, 2.0f, 0.0f, 180.0f, 1.0f, 0.0f, 0.0f);
+	drawFrustum2(0.0f, 5.0f, 0.0f, 180.0f, 1.0f, 0.0f, 0.0f);
+	drawFrustum1(0.0f, 2.0f, 0.0f, 180.0f, 1.0f, 0.0f, 0.0f);
 	glPopMatrix();
-
+	setDiffuseMap("img/chair1_rotate.png");
+	drawCylinder(0.0f, 6.0f, 0.0f, 4.0f, 2.0f, 4.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	// 绘制桶的铁环
 	setDiffuseMap("img/chair2.png");
@@ -593,7 +592,7 @@ void MyGLWidget::drawSkybox()
 	glBindVertexArray(0);
 }
 
-/* 基本形状绘制函数 */
+/* ******************** 基本形状绘制函数 ******************** */
 
 void MyGLWidget::drawCuboid(float tx, float ty, float tz, float sx, float sy, float sz,
 	float angle, float rx, float ry, float rz)
@@ -640,15 +639,28 @@ void MyGLWidget::drawCylinder(float tx, float ty, float tz, float sx, float sy, 
 	glPopMatrix();
 }
 
-void MyGLWidget::drawOval(float tx, float ty, float tz, float angle, float rx, float ry, float rz)
+void MyGLWidget::drawFrustum1(float tx, float ty, float tz, float angle, float rx, float ry, float rz)
 {
 	glPushMatrix();
 	glTranslatef(tx, ty, tz);
 	glRotatef(angle, rx, ry, rz);
 	updateShader();
 
-	glBindVertexArray(ovalVAO);
-	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfOval);
+	glBindVertexArray(frustumVAO1);
+	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfFrustum1);
+	glBindVertexArray(0);
+	glPopMatrix();
+}
+
+void MyGLWidget::drawFrustum2(float tx, float ty, float tz, float angle, float rx, float ry, float rz)
+{
+	glPushMatrix();
+	glTranslatef(tx, ty, tz);
+	glRotatef(angle, rx, ry, rz);
+	updateShader();
+
+	glBindVertexArray(frustumVAO2);
+	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfFrustum2);
 	glBindVertexArray(0);
 	glPopMatrix();
 }
@@ -661,21 +673,8 @@ void MyGLWidget::drawCone(float tx, float ty, float tz, float angle, float rx, f
 	updateShader();
 
 	glBindVertexArray(coneVAO);
-	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfCone);
-	glBindVertexArray(0);
-	glPopMatrix();
-}
-
-void MyGLWidget::drawTaper(float tx, float ty, float tz, float angle, float rx, float ry, float rz)
-{
-	glPushMatrix();
-	glTranslatef(tx, ty, tz);
-	glRotatef(angle, rx, ry, rz);
-	updateShader();
-
-	glBindVertexArray(taperVAO);
 	glDrawArrays(GL_TRIANGLES, 0, vertexNumOfTaper);
-	glBindVertexArray(taperVAO);
+	glBindVertexArray(coneVAO);
 	glPopMatrix();
 }
 
@@ -750,7 +749,7 @@ void MyGLWidget::drawTorus(float innerRadius, float OutRadius) {
 	glBindVertexArray(0);
 }
 
-/* 初始化相关函数 */
+/* ******************** 初始化相关函数 ******************** */
 
 void MyGLWidget::initCube()
 {
@@ -786,7 +785,7 @@ void MyGLWidget::initSemicylinder()
 		semicircleVertices[i] = initialTriangle[i];
 	}
 
-	// 迭代10次 函数调用完成后semicircleVertices中保存了绘制半圆的顶点信息
+	// 迭代细分三角 函数调用完成后semicircleVertices中保存了绘制半圆的顶点信息
 	// 半圆由许多细分三角形组成 每个三角形以原点为起点 按顺时针方向保存顶点信息
 	subdivideTriangle(ITERATIONS, semicircleVertices);
 
@@ -862,69 +861,7 @@ void MyGLWidget::initSemicylinder()
 	}
 
 	// 设置侧面中曲面相关的顶点信息
-	// 上下两个细分三角形的原点对边 构成一个侧面细分长方形
-	int numOfTriangles = semicircleVertices.size() / 3 / 3;
-	for (int i = 0; i < numOfTriangles; i++)
-	{
-		// 记上面的细分三角形为a 下面的细分三角形为b
-		// v1 v2 和 v3 分别为原细分三角形的三个顶点
-		GLfloat v1[3], v2[3], v3[3];
-		GLfloat va1[3], va2[3], va3[3], vb1[3], vb2[3], vb3[3];
-		for (int j = 0; j < 3; j++)
-		{
-			v1[j] = semicircleVertices[i * 9 + j];
-			v2[j] = semicircleVertices[i * 9 + j + 3];
-			v3[j] = semicircleVertices[i * 9 + j + 6];
-
-			va1[j] = upperVertices[i * 24 + j];		// 原点 无作用
-			va2[j] = upperVertices[i * 24 + j + 8];
-			va3[j] = upperVertices[i * 24 + j + 16];
-			vb1[j] = lowerVertices[i * 24 + j];		// 原点 无作用
-			vb2[j] = lowerVertices[i * 24 + j + 8];
-			vb3[j] = lowerVertices[i * 24 + j + 16];
-		}
-		/*
-		侧视图如下
-			   va3  va2
-				|\^^|
-				| \ |
-				|__\|
-			   vb3 vb2
-		*/
-
-		// va2顶点对应的法向量相当于 semicircleVertices中v2的位置坐标 下同
-		addVertex(va2[0], va2[1], va2[2], sideVertices);	// 位置
-		addVertex(v2[0], v2[1], v2[2], sideVertices);		// 法向量
-		// 纹理坐标
-		sideVertices.push_back(1.0f);
-		sideVertices.push_back(1.0f / numOfTriangles * i);
-		addVertex(vb2[0], vb2[1], vb2[2], sideVertices);	// 位置
-		addVertex(v2[0], v2[1], v2[2], sideVertices);		// 法向量
-		// 纹理坐标
-		sideVertices.push_back(0.0f);
-		sideVertices.push_back(1.0f / numOfTriangles * i);
-		addVertex(va3[0], va3[1], va3[2], sideVertices);	// 位置
-		addVertex(v3[0], v3[1], v3[2], sideVertices);		// 法向量
-		// 纹理坐标
-		sideVertices.push_back(1.0f);
-		sideVertices.push_back(1.0f / numOfTriangles * (i + 1));
-
-		addVertex(va3[0], va3[1], va3[2], sideVertices);	// 位置
-		addVertex(v3[0], v3[1], v3[2], sideVertices);		// 法向量
-		// 纹理坐标
-		sideVertices.push_back(1.0f);
-		sideVertices.push_back(1.0f / numOfTriangles * (i + 1));
-		addVertex(vb2[0], vb2[1], vb2[2], sideVertices);	// 位置
-		addVertex(v2[0], v2[1], v2[2], sideVertices);		// 法向量
-		// 纹理坐标
-		sideVertices.push_back(0.0f);
-		sideVertices.push_back(1.0f / numOfTriangles * i);
-		addVertex(vb3[0], vb3[1], vb3[2], sideVertices);	// 位置
-		addVertex(v3[0], v3[1], v3[2], sideVertices);		// 法向量
-		// 纹理坐标
-		sideVertices.push_back(0.0f);
-		sideVertices.push_back(1.0f / numOfTriangles * (i + 1));
-	}
+	generateSideVertices(semicircleVertices, upperVertices, lowerVertices, sideVertices);
 
 	// 设置侧面中平面相关的顶点信息
 	addVertex(0.0f, 1.0f, -1.0f, sideVertices);		// 位置
@@ -983,7 +920,7 @@ void MyGLWidget::initCylinder()
 		circleVertices[i] = initialTriangle[i];
 	}
 
-	// 迭代10次 函数调用完成后circleVertices中保存了绘制圆的顶点信息
+	// 迭代细分三角 函数调用完成后circleVertices中保存了绘制圆的顶点信息
 	// 圆由许多细分三角形组成 每个三角形以原点为起点 按顺时针方向保存顶点信息
 	subdivideTriangle(ITERATIONS, circleVertices, 1);
 
@@ -1056,55 +993,8 @@ void MyGLWidget::initCylinder()
 		}
 	}
 
-	// 设置侧面中曲面相关的顶点信息
-	// 上下两个细分三角形的原点对边 构成一个侧面细分长方形
-	int numOfTriangles = circleVertices.size() / 3 / 3;
-	for (int i = 0; i < circleVertices.size() / 3 / 3; i++)
-	{
-		// 记上面的细分三角形为a, 下面的细分三角形为b
-		// v1 v2 和v3 分别为原细分三角形的三个顶点
-		GLfloat v1[3], v2[3], v3[3];
-		GLfloat va1[3], va2[3], va3[3], vb1[3], vb2[3], vb3[3];
-		for (int j = 0; j < 3; j++)
-		{
-			v1[j] = circleVertices[i * 9 + j];
-			v2[j] = circleVertices[i * 9 + j + 3];
-			v3[j] = circleVertices[i * 9 + j + 6];
+	generateSideVertices(circleVertices, upperVertices, lowerVertices, sideVertices, 0.16f);
 
-			va1[j] = upperVertices[i * 24 + j];
-			va2[j] = upperVertices[i * 24 + j + 8];
-			va3[j] = upperVertices[i * 24 + j + 16];
-			vb1[j] = lowerVertices[i * 24 + j];
-			vb2[j] = lowerVertices[i * 24 + j + 8];
-			vb3[j] = lowerVertices[i * 24 + j + 16];
-		}
-
-		addVertex(va2[0], va2[1], va2[2], sideVertices);
-		addVertex(v2[0], v2[1], v2[2], sideVertices);
-		sideVertices.push_back(1.0f / numOfTriangles * i);
-		sideVertices.push_back(0.16f);
-		addVertex(vb2[0], vb2[1], vb2[2], sideVertices);
-		addVertex(v2[0], v2[1], v2[2], sideVertices);
-		sideVertices.push_back(1.0f / numOfTriangles * i);
-		sideVertices.push_back(0.0f);
-		addVertex(va3[0], va3[1], va3[2], sideVertices);
-		addVertex(v3[0], v3[1], v3[2], sideVertices);
-		sideVertices.push_back(1.0f / numOfTriangles * (i + 1));
-		sideVertices.push_back(0.16f);
-
-		addVertex(va3[0], va3[1], va3[2], sideVertices);
-		addVertex(v3[0], v3[1], v3[2], sideVertices);
-		sideVertices.push_back(1.0f / numOfTriangles * (i + 1));
-		sideVertices.push_back(0.16f);
-		addVertex(vb2[0], vb2[1], vb2[2], sideVertices);
-		addVertex(v2[0], v2[1], v2[2], sideVertices);
-		sideVertices.push_back(1.0f / numOfTriangles * i);
-		sideVertices.push_back(0.0f);
-		addVertex(vb3[0], vb3[1], vb3[2], sideVertices);
-		addVertex(v3[0], v3[1], v3[2], sideVertices);
-		sideVertices.push_back(1.0f / numOfTriangles * (i + 1));
-		sideVertices.push_back(0.0f);
-	}
 	cylinderVertices.insert(cylinderVertices.end(), upperVertices.begin(), upperVertices.end());
 	cylinderVertices.insert(cylinderVertices.end(), lowerVertices.begin(), lowerVertices.end());
 	cylinderVertices.insert(cylinderVertices.end(), sideVertices.begin(), sideVertices.end());
@@ -1116,10 +1006,6 @@ void MyGLWidget::initCylinder()
 	glGenBuffers(1, &cylinderVBO);
 	glBindBuffer(GL_ARRAY_BUFFER, cylinderVBO);
 	glBufferData(GL_ARRAY_BUFFER, cylinderVertices.size() * sizeof(GLfloat), &cylinderVertices[0], GL_STATIC_DRAW);
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	//glEnableVertexAttribArray(1);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
@@ -1192,12 +1078,12 @@ void MyGLWidget::initTaper()
 	vertexNumOfTaper = taperVertices.size() / 2 / 3;
 
 	// 创建VAO并绑定
-	glGenVertexArrays(1, &taperVAO);
-	glBindVertexArray(taperVAO);
+	glGenVertexArrays(1, &coneVAO);
+	glBindVertexArray(coneVAO);
 	// 为VBO创建一个缓冲区对象
-	glGenBuffers(1, &taperVBO);
+	glGenBuffers(1, &coneVBO);
 	// 利用vertices数组中的内容更新VBO的信息
-	glBindBuffer(GL_ARRAY_BUFFER, taperVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, coneVBO);
 	glBufferData(GL_ARRAY_BUFFER, taperVertices.size() * sizeof(GLfloat), &taperVertices[0], GL_STATIC_DRAW);
 	// 指定顶点属性数组的数据格式和位置
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
@@ -1209,7 +1095,7 @@ void MyGLWidget::initTaper()
 	glBindVertexArray(0);
 }
 
-void MyGLWidget::initCone(GLuint &givenVAO, GLuint &givenVBO, int &vertexNum, 
+void MyGLWidget::initFrustum(GLuint &givenVAO, GLuint &givenVBO, int &vertexNum, 
 	float upperRadius, float lowerRadius, float height)
 {
 	std::vector<GLfloat> coneupVertices;    // 保存了圆台顶部圆顶点位置信息
