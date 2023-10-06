@@ -193,6 +193,10 @@
     <ClInclude Include="shape_coordinate.h" />
     <ClInclude Include="helper.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="fragmentShader.glsl" />
+    <None Include="vertexShader.glsl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>

@@ -1,80 +1,70 @@
 #include "myglwidget.h"
 using namespace std;
 
-// MyGLWidget类的构造函数，实例化定时器timer
-MyGLWidget::MyGLWidget(QWidget* parent)
-	:QOpenGLWidget(parent)
+MyGLWidget::MyGLWidget(QWidget* parent) : QOpenGLWidget(parent)
 {
-	resize(1280, 800);
-	timer = new QTimer(this); // 实例化一个定时器
-	timer->start(16); // 时间间隔设置为50ms，可以根据需要调整
-	connect(timer, SIGNAL(timeout()), this, SLOT(update())); // 连接update()函数，每16ms触发一次update()函数进行重新绘图
+	timer = new QTimer(this);	// 实例化一个定时器
+	timer->start(40);			// 时间间隔设置为40ms
+
+	// 利用Qt的信号和槽机制 连接定时器和update()函数，每16ms触发一次update()函数进行重新绘图
+	// 调用update()函数时 会请求重绘事件 并在下一个事件循环中调用paintGL()函数来重新绘制OpenGL场景
+	connect(timer, SIGNAL(timeout()), this, SLOT(update())); 
 }
 
-// MyGLWidget类的析构函数，删除timer
 MyGLWidget::~MyGLWidget()
 {
 	delete this->timer;
 }
 
-void MyGLWidget::keyPressEvent(QKeyEvent* event)
-{
-	setCamera(event->key());
-}
-
-// 初始化绘图参数，如视窗大小、背景色等
 void MyGLWidget::initializeGL()
 {
+	resize(1280, 800);
+	// 将当前OpenGL上下文中的函数指针与Qt提供的OpenGL函数类进行绑定
 	initializeOpenGLFunctions();
 
-	// vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	// Your Implementation
+	// 设置深度缓冲
+	glClearDepth(1.0f);			// 设置深度缓冲区的清除值 1.0为最远的深度
+	glDepthFunc(GL_LESS);		// 设置深度测试函数 GL_LESS指定只有当新像素的深度值
+								// 小于当前像素的深度值时 新像素才会被绘制。
+	glEnable(GL_DEPTH_TEST);	// 启用深度测试 OpenGL会自动根据深度值进行像素的遮挡和显示
 
-	glClearDepth(1.0f); //设置深度缓存
-
-	glDepthFunc(GL_LESS);
-	glEnable(GL_DEPTH_TEST);
-
-	// 设置正交投影
+	// 设置透视投影矩阵
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+	glLoadIdentity();	// 将投影矩阵重置为单位矩阵 确保当前的设置不受到以前的影响
 	float range = 45.0f;
+	// 四个参数分别为 视角范围（以度为单位） 宽高比 近裁剪面和远裁剪面
 	gluPerspective(range, 1.0 * width() / height(), 0.1f, 2000.0f);
 
 	// 初始化着色器和VBO
 	initShader("vertexShader.glsl", "fragmentShader.glsl");
+
+	// 初始化各种形状和组件的VBO和VAO
 	initCube();
 	initSemicylinder();
-
 	initCylinder();
 	initCone();
-	initFrustum(frustumVAO1, frustumVBO1, vertexNumOfFrustum1,3.0f, 3.5f, 2.0f);
+	initFrustum(frustumVAO1, frustumVBO1, vertexNumOfFrustum1, 3.0f, 3.5f, 2.0f);
 	initFrustum(frustumVAO2, frustumVBO2, vertexNumOfFrustum2, 3.5f, 4.0f, 3.0f);
 
 	initRestaurant();
 	initSkybox();
 
+	// 启用混合功能
 	glEnable(GL_BLEND);
+	// 根据源颜色的alpha通道值来确定绘制物体时的不透明度
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	glViewport(0, 0, width(), height());
-
+	// 设置每一帧开始前用来清除颜色缓冲区的颜色为黑色
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-// 绘图函数，实现图形绘制，会被update()函数调用
 void MyGLWidget::paintGL()
 {
-	// Your Implementation
-	// 检测用户是否移动摄像机 设置摄像机位置
 	setCamera(0);
 	updateShader();
 
-	//glUseProgram(0);
 	// 绘制船体和收银台
 	glPushMatrix();
-	//glTranslatef(0.0f, 7.5f, -33.0f);
-	//glScalef(1.5f, 1.5f, 1.5f);
 	glTranslatef(0.0f, 10.0f, -14.0f);
 	glScalef(2.0f, 2.0f, 2.0f);
 	glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
@@ -82,7 +72,6 @@ void MyGLWidget::paintGL()
 	glPopMatrix();
 
 	// 绘制地板
-	//setObjectColor(135 / 255.0, 176 / 255.0, 111 / 255.0);
 	useTexture = 1;
 	setDiffuseMap("img/floor.png");
 	drawCuboid(0.0f, -0.5f, 0.0f, 480.0f, 1.0f, 500.0f);
@@ -107,6 +96,7 @@ void MyGLWidget::paintGL()
 	glPopMatrix();
 
 	// 绘制桌椅
+	
 	// 左后
 	glPushMatrix();
 	glTranslatef(-100.0f, 1.0f, -10.0f);
@@ -169,17 +159,21 @@ void MyGLWidget::paintGL()
 	useTexture = 0;
 }
 
-// 当窗口大小改变时调整视窗尺寸
 void MyGLWidget::resizeGL(int width, int height)
 {
-	glViewport(0, 0, width, height);
-
 	// 调整窗口时保持画面比例不变
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	float range = 45.0f;
 	gluPerspective(range, 1.0 * width / height, 0.1f, 2000.0f);
+	// 请求重新绘制窗口内容
+	update();
+}
 
+void MyGLWidget::keyPressEvent(QKeyEvent* event)
+{
+	// 检测用户是否移动摄像机 设置摄像机位置
+	setCamera(event->key());
 	update();
 }
 
@@ -322,7 +316,8 @@ void MyGLWidget::setDiffuseMap(const char* imagePath)
 		// 设置多级渐远纹理过滤方式
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-	} else {
+	}
+	else {
 		textureID = imgpath2texture[imagePath];
 		index = imgpath2index[imagePath];
 	}
@@ -390,24 +385,24 @@ void MyGLWidget::setCamera(int key)
 	float xRate2 = -zRate, zRate2 = xRate; // 向后的方向 即向右的方向顺时针旋转90度
 	switch (key)
 	{
-	// 上下左右方向键的功能
-	// 镜头向上移动
+		// 上下左右方向键的功能
+		// 镜头向上移动
 	case Qt::Key_Up: setViewPos(viewPos[0], viewPos[1] + speed, viewPos[2]);
 		setViewDesPos(viewDesPos[0], viewDesPos[1] + speed, viewDesPos[2]); break;
-	// 镜头向下移动
+		// 镜头向下移动
 	case Qt::Key_Down: setViewPos(viewPos[0], viewPos[1] - speed, viewPos[2]);
 		setViewDesPos(viewDesPos[0], viewDesPos[1] - speed, viewDesPos[2]); break;
-	// 镜头向左移动
+		// 镜头向左移动
 	case Qt::Key_Left: setViewPos(viewPos[0] - speed * xRate, viewPos[1], viewPos[2] - speed * zRate);
 		setViewDesPos(viewDesPos[0] - speed * xRate, viewDesPos[1], viewDesPos[2] - speed * zRate); break;
-	// 镜头向右移动
+		// 镜头向右移动
 	case Qt::Key_Right: setViewPos(viewPos[0] + speed * xRate, viewPos[1], viewPos[2] + speed * zRate);
 		setViewDesPos(viewDesPos[0] + speed * xRate, viewDesPos[1], viewDesPos[2] + speed * zRate); break;
-	// wsad键的功能
-	// 镜头向前移动
+		// wsad键的功能
+		// 镜头向前移动
 	case Qt::Key_W: setViewPos(viewPos[0] - speed * xRate2, viewPos[1], viewPos[2] - speed * zRate2);
 		setViewDesPos(viewDesPos[0] - speed * xRate2, viewDesPos[1], viewDesPos[2] - speed * zRate2); break;
-	// 镜头向后移动
+		// 镜头向后移动
 	case Qt::Key_S: setViewPos(viewPos[0] + speed * xRate2, viewPos[1], viewPos[2] + speed * zRate2);
 		setViewDesPos(viewDesPos[0] + speed * xRate2, viewDesPos[1], viewDesPos[2] + speed * zRate2); break;
 	case Qt::Key_A: rotateViewDes(false); break;	// 镜头向左旋转45度
@@ -550,8 +545,8 @@ void MyGLWidget::drawSkybox()
 /* ******************** 基本形状绘制函数 ******************** */
 
 // 由其他draw函数调用 实现统一的图形绘制功能
-void MyGLWidget::_drawShape(GLuint givenVAO, GLenum mod, GLsizei count, 
-	float tx, float ty, float tz, float sx, float sy, float sz, 
+void MyGLWidget::_drawShape(GLuint givenVAO, GLenum mod, GLsizei count,
+	float tx, float ty, float tz, float sx, float sy, float sz,
 	float angle, float rx, float ry, float rz)
 {
 	glPushMatrix();
@@ -570,7 +565,7 @@ void MyGLWidget::_drawShape(GLuint givenVAO, GLenum mod, GLsizei count,
 void MyGLWidget::drawCuboid(float tx, float ty, float tz, float sx, float sy, float sz,
 	float angle, float rx, float ry, float rz)
 {
-	_drawShape(cubeVAO, GL_TRIANGLES, 12 * 3, 
+	_drawShape(cubeVAO, GL_TRIANGLES, 12 * 3,
 		tx, ty, tz, sx, sy, sz, angle, rx, ry, rz);
 }
 
@@ -785,8 +780,8 @@ void MyGLWidget::initSemicylinder()
 
 void MyGLWidget::initCylinder()
 {
-    std::vector<GLfloat> circleVertices;    // 保存了圆顶点位置
-    std::vector<GLfloat> cylinderVertices;  // 保存了圆柱体顶点信息 包括位置和法向量
+	std::vector<GLfloat> circleVertices;    // 保存了圆顶点位置
+	std::vector<GLfloat> cylinderVertices;  // 保存了圆柱体顶点信息 包括位置和法向量
 
 	// 将initialTriangle中的顶点信息保存到circleVertices中
 	circleVertices.resize(4 * 3 * 3);
@@ -970,7 +965,7 @@ void MyGLWidget::initCone()
 	glBindVertexArray(0);
 }
 
-void MyGLWidget::initFrustum(GLuint &givenVAO, GLuint &givenVBO, int &vertexNum, 
+void MyGLWidget::initFrustum(GLuint& givenVAO, GLuint& givenVBO, int& vertexNum,
 	float upperRadius, float lowerRadius, float height)
 {
 	std::vector<GLfloat> coneupVertices;    // 保存了圆台顶部圆顶点位置信息
@@ -1105,11 +1100,11 @@ void MyGLWidget::initFrustum(GLuint &givenVAO, GLuint &givenVBO, int &vertexNum,
 		sideVertices.push_back(1.0f / numOfTriangles * (i + 1));
 		sideVertices.push_back(1.0f);
 		addVertex(vb2[0], vb2[1], vb2[2], sideVertices);
-		addVertex(vd2[0], lowerRadius* k, vd2[2], sideVertices);
+		addVertex(vd2[0], lowerRadius * k, vd2[2], sideVertices);
 		sideVertices.push_back(1.0f / numOfTriangles * i);
 		sideVertices.push_back(0.0f);
 		addVertex(vb3[0], vb3[1], vb3[2], sideVertices);
-		addVertex(vd3[0], lowerRadius* k, vd3[2], sideVertices);
+		addVertex(vd3[0], lowerRadius * k, vd3[2], sideVertices);
 		sideVertices.push_back(1.0f / numOfTriangles * (i + 1));
 		sideVertices.push_back(0.0f);
 	}

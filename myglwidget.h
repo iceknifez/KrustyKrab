@@ -32,12 +32,17 @@ class MyGLWidget : public QOpenGLWidget, QOpenGLFunctions_3_3_Core {
 public:
     MyGLWidget(QWidget* parent = nullptr);
     ~MyGLWidget();
-    void keyPressEvent(QKeyEvent* event);   // 键盘事件
 
 protected:
+    // QOpenGLWidget提供的三个虚函数
+    // initializeGL：在创建OpenGL环境时被调用，用于进行OpenGL的初始化操作
+    // paintGL：在每次窗口需要重新绘制时被调用，用于绘制OpenGL场景
+    // resizeGL：在窗口尺寸发生变化时被调用，用于处理OpenGL视口的调整
     void initializeGL();
     void paintGL();
     void resizeGL(int width, int height);
+
+    void keyPressEvent(QKeyEvent* event);   // 键盘事件
 
     // 根据指定的文件中的内容初始化顶点着色器和片元着色器
     void initShader(std::string vertexPath, std::string fragmentPath);
@@ -77,32 +82,32 @@ private:
 
 protected:
     // 根据指定的位移和缩放绘制长方体
-    void drawCuboid(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f, 
+    void drawCuboid(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f,
         float sx = 1.0f, float sy = 1.0f, float sz = 1.0f,
         float angle = 0.0f, float rx = 0.0f, float ry = 0.0f, float rz = 0.0f);
     // 根据指定的位移和缩放绘制半圆柱体
-    void drawSemicylinder(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f, 
+    void drawSemicylinder(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f,
         float sx = 1.0f, float sy = 1.0f, float sz = 1.0f,
         float angle = 0.0f, float rx = 0.0f, float ry = 0.0f, float rz = 0.0f);
     // 根据指定的位移和缩放绘制圆柱体
-    void drawCylinder(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f, 
+    void drawCylinder(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f,
         float sx = 1.0f, float sy = 1.0f, float sz = 1.0f,
         float angle = 0.0f, float rx = 0.0f, float ry = 0.0f, float rz = 0.0f);
     // 根据指定的位移绘制圆台体(较缓)
-    void drawFrustum1(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f, 
+    void drawFrustum1(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f,
         float sx = 1.0f, float sy = 1.0f, float sz = 1.0f,
         float angle = 0.0f, float rx = 0.0f, float ry = 0.0f, float rz = 0.0f);
     // 根据指定的位移绘制圆台体(较陡)
-    void drawFrustum2(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f, 
+    void drawFrustum2(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f,
         float sx = 1.0f, float sy = 1.0f, float sz = 1.0f,
         float angle = 0.0f, float rx = 0.0f, float ry = 0.0f, float rz = 0.0f);
     // 绘制圆锥
-    void drawCone(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f, 
+    void drawCone(float tx = 0.0f, float ty = 0.0f, float tz = 0.0f,
         float sx = 1.0f, float sy = 1.0f, float sz = 1.0f,
         float angle = 0.0f, float rx = 0.0f, float ry = 0.0f, float rz = 0.0f);
     // 绘制半圆环
     void drawTorus(float innerRadius, float OutRadius,
-        float tx = 0.0f, float ty = 0.0f, float tz = 0.0f, 
+        float tx = 0.0f, float ty = 0.0f, float tz = 0.0f,
         float sx = 1.0f, float sy = 1.0f, float sz = 1.0f,
         float angle = 0.0f, float rx = 0.0f, float ry = 0.0f, float rz = 0.0f);
 
@@ -117,7 +122,7 @@ protected:
     // 初始化coneVBO和coneVAO 保存了绘制圆锥体的信息
     void initCone();
     // 初始化givenVAO和givenVBO 保存了绘制上圆半径upperRadius下圆半径lowerRadius的圆台的信息
-    void initFrustum(GLuint &givenVAO, GLuint &givenVBO, int &vertexNum,
+    void initFrustum(GLuint& givenVAO, GLuint& givenVBO, int& vertexNum,
         float upperRadius = 1.0f, float lowerRadius = 1.0f, float height = 1.0f);
     // 初始化torusVBO和torusVAO 并将半径和VAO的映射关系保存到radius2torusVAO中
     void initTorus(float innerRadius, float outRadius, const int SIDES = 100, const int RINGS = 100);
@@ -128,11 +133,11 @@ protected:
 
 private:
     QTimer* timer;
-    
+
     GLuint vertexShader;
     GLuint fragmentShader;
     GLuint program;
-    
+
     /* ******************** 纹理贴图相关 ******************** */
 
     // 控制是否使用漫反射纹理贴图 1为使用 0为不使用
@@ -192,7 +197,7 @@ private:
 
     const float ITERATIONS = 10;    // 细分三角形迭代次数
     const float PI = 3.14;
-    
+
     // initShader函数中使用到的变量 和读取文件相关
     std::ifstream vertexShaderFile;
     std::ifstream fragmentShaderFile;
