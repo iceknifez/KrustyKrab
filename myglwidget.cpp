@@ -381,29 +381,35 @@ void MyGLWidget::setCamera(int key)
 {
 	// 上下左右移动相机
 	float speed = 7.0f;
-	//printf("%d\n", ch);
 	float xRate2 = -zRate, zRate2 = xRate; // 向后的方向 即向右的方向顺时针旋转90度
+	const float RANGE = 1000.0f;	// 限制移动范围
 	switch (key)
 	{
 		// 上下左右方向键的功能
 		// 镜头向上移动
-	case Qt::Key_Up: setViewPos(viewPos[0], viewPos[1] + speed, viewPos[2]);
+	case Qt::Key_Up: if(abs(viewPos[1] + speed) > RANGE / 2) break;
+		setViewPos(viewPos[0], viewPos[1] + speed, viewPos[2]);
 		setViewDesPos(viewDesPos[0], viewDesPos[1] + speed, viewDesPos[2]); break;
 		// 镜头向下移动
-	case Qt::Key_Down: setViewPos(viewPos[0], viewPos[1] - speed, viewPos[2]);
+	case Qt::Key_Down: if(abs(viewPos[1] - speed) > RANGE / 2) break;
+		setViewPos(viewPos[0], viewPos[1] - speed, viewPos[2]);
 		setViewDesPos(viewDesPos[0], viewDesPos[1] - speed, viewDesPos[2]); break;
 		// 镜头向左移动
-	case Qt::Key_Left: setViewPos(viewPos[0] - speed * xRate, viewPos[1], viewPos[2] - speed * zRate);
+	case Qt::Key_Left: if(abs(viewPos[0] - speed * xRate) > RANGE || abs(viewPos[2] - speed * zRate) > RANGE) break;
+		setViewPos(viewPos[0] - speed * xRate, viewPos[1], viewPos[2] - speed * zRate);
 		setViewDesPos(viewDesPos[0] - speed * xRate, viewDesPos[1], viewDesPos[2] - speed * zRate); break;
 		// 镜头向右移动
-	case Qt::Key_Right: setViewPos(viewPos[0] + speed * xRate, viewPos[1], viewPos[2] + speed * zRate);
+	case Qt::Key_Right: if (abs(viewPos[0] + speed * xRate) > RANGE || abs(viewPos[2] + speed * zRate) > RANGE) break;
+		setViewPos(viewPos[0] + speed * xRate, viewPos[1], viewPos[2] + speed * zRate);
 		setViewDesPos(viewDesPos[0] + speed * xRate, viewDesPos[1], viewDesPos[2] + speed * zRate); break;
 		// wsad键的功能
 		// 镜头向前移动
-	case Qt::Key_W: setViewPos(viewPos[0] - speed * xRate2, viewPos[1], viewPos[2] - speed * zRate2);
+	case Qt::Key_W: if (abs(viewPos[0] - speed * xRate2) > RANGE || abs(viewPos[2] - speed * zRate2) > RANGE) break;
+		setViewPos(viewPos[0] - speed * xRate2, viewPos[1], viewPos[2] - speed * zRate2);
 		setViewDesPos(viewDesPos[0] - speed * xRate2, viewDesPos[1], viewDesPos[2] - speed * zRate2); break;
 		// 镜头向后移动
-	case Qt::Key_S: setViewPos(viewPos[0] + speed * xRate2, viewPos[1], viewPos[2] + speed * zRate2);
+	case Qt::Key_S: if (abs(viewPos[0] + speed * xRate2) > RANGE || abs(viewPos[2] + speed * zRate2) > RANGE) break;
+		setViewPos(viewPos[0] + speed * xRate2, viewPos[1], viewPos[2] + speed * zRate2);
 		setViewDesPos(viewDesPos[0] + speed * xRate2, viewDesPos[1], viewDesPos[2] + speed * zRate2); break;
 	case Qt::Key_A: rotateViewDes(false); break;	// 镜头向左旋转45度
 	case Qt::Key_D: rotateViewDes(true); break;	// 镜头向右旋转45度

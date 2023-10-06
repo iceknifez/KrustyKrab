@@ -18,6 +18,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <codecvt>
 #include <cmath>
 #include <time.h>
 #include <conio.h>
