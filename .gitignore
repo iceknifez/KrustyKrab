@@ -1,7 +1,5 @@
 .vs
 debug
 release
-.qmake.stash
-*.pro.user
 *.sln
 *.vcxproj.*

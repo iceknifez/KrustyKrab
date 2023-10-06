@@ -1,4 +1,4 @@
-#include "myglwidget.h"
+﻿#include "myglwidget.h"
 
 #include <QApplication>
 
